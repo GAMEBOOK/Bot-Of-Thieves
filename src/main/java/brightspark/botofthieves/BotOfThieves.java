@@ -1,6 +1,7 @@
 package brightspark.botofthieves;
 
 import brightspark.botofthieves.commands.CommandHello;
+import brightspark.botofthieves.util.Utils;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import net.dv8tion.jda.core.AccountType;
@@ -9,6 +10,7 @@ import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.Role;
+import net.dv8tion.jda.core.entities.TextChannel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,9 +26,10 @@ public class BotOfThieves
 
     public static Logger LOG = LogManager.getLogger();
     public static JDA JDA;
+    public static EventWaiter WAITER = new EventWaiter();
     public static String PREFIX;
     public static Role ADMIN_ROLE;
-    public static EventWaiter WAITER = new EventWaiter();
+    public static TextChannel LOG_CHANNEL;
 
     static
     {
@@ -51,7 +54,7 @@ public class BotOfThieves
 
         Config.read();
 
-        PREFIX = Config.get("prefix", "!");
+        PREFIX = Config.get("command_prefix", "!");
 
         JDA = new JDABuilder(AccountType.BOT)
                 .setToken(Config.get("token"))
@@ -71,5 +74,12 @@ public class BotOfThieves
         CommandClientBuilder builder = new CommandClientBuilder();
         builder.setGame(Game.playing("Testing!"))
                 .setOwnerId(Config.get("owner_id"));
+
+        //Save incase any defaults were set
+        Config.save();
+
+        String logChannel = Config.get("log_channel_name");
+        if(!logChannel.isEmpty())
+            LOG_CHANNEL = Utils.findTextChannel(logChannel);
     }
 }
