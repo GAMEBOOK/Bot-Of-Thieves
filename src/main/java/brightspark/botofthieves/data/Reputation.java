@@ -7,7 +7,7 @@ import net.dv8tion.jda.core.entities.User;
 public class Reputation
 {
     private long userId;
-    private int good, bad;
+    private long good, bad;
     private Long banEnd;
 
     public Reputation(@NotNull User user)
@@ -26,7 +26,7 @@ public class Reputation
     /**
      * Gets the amount of good reputation
      */
-    public int getGood()
+    public long getGood()
     {
         return good;
     }
@@ -42,15 +42,28 @@ public class Reputation
     /**
      * Gets the amount of bad reputation
      */
-    public int getBad()
+    public long getBad()
     {
         return bad;
     }
 
     /**
+     * Gets the amount of reputation of the type specified
+     */
+    public long getType(@NotNull ReputationType type)
+    {
+        switch(type)
+        {
+            case GOOD:  return getGood();
+            case BAD:   return getBad();
+            default:    throw new IllegalArgumentException("Unhandled ReputationType '" + type + "'");
+        }
+    }
+
+    /**
      * Gets the total reputation (good - bad)
      */
-    public int getTotal()
+    public long getTotal()
     {
         return good - bad;
     }
@@ -68,7 +81,7 @@ public class Reputation
      * Increase the given type of reputation if not banned
      * Returns false if the user is banned and therefore no change is made
      */
-    public boolean increase(@NotNull ReputationType type, int amount)
+    public boolean increase(@NotNull ReputationType type, long amount)
     {
         if(type.isGood())
         {
@@ -91,20 +104,20 @@ public class Reputation
     /**
      * Decreases the given type of reputation
      */
-    public void decrease(@NotNull ReputationType type, int amount)
+    public void decrease(@NotNull ReputationType type, long amount)
     {
         if(type.isGood())
-            good -= amount;
+            good = Math.max(0, good - amount);
         else
-            bad -= amount;
+            bad = Math.max(0, bad - amount);
     }
 
     /**
      * Gets a number between 0 and 1 representing the ratio of good to bad reputation earned
      */
-    public float getRatio()
+    public double getRatio()
     {
-        return (float) (good + bad) / (float) good;
+        return (double) (good + bad) / (double) good;
     }
 
     /**
@@ -153,6 +166,6 @@ public class Reputation
     {
         //Green Heart, Skull and Crossbones, Minus Sign
         return String.format("%s %s %s %s %s %s",
-                Utils.EMOJI_GREEN_HEART, good, Utils.EMOJI_NAME_BADGE, bad, Utils.EMOJI_ANCHOR, getRatio());
+                Utils.EMOJI_GREEN_HEART, good, Utils.EMOJI_NAME_BADGE, bad, Utils.EMOJI_ANCHOR, Math.round(getRatio() * 100));
     }
 }

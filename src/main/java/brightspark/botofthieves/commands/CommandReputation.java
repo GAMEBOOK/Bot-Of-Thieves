@@ -1,5 +1,7 @@
 package brightspark.botofthieves.commands;
 
+import brightspark.botofthieves.data.Reputation;
+import brightspark.botofthieves.data.ReputationChangeResult;
 import brightspark.botofthieves.data.ReputationHandler;
 import brightspark.botofthieves.data.ReputationType;
 import com.jagrosh.jdautilities.command.CommandEvent;
@@ -27,7 +29,7 @@ public class CommandReputation extends CommandBase
         if(member == null) return;
         User user = member.getUser();
         ReputationType repType;
-        int amount = 1;
+        long amount = 1;
 
         switch(args[0].toLowerCase())
         {
@@ -37,12 +39,11 @@ public class CommandReputation extends CommandBase
                     fail(event, "Missing whether to change good or bad reputation!");
                     return;
                 }
-
                 if(args.length >= 4)
                 {
                     try
                     {
-                        amount = Integer.parseInt(args[3]);
+                        amount = Long.parseLong(args[3]);
                     }
                     catch(NumberFormatException e)
                     {
@@ -50,11 +51,32 @@ public class CommandReputation extends CommandBase
                         return;
                     }
                 }
-                if(ReputationHandler.addRep(user, repType))
-                    reply(event, "Added %s to %s's %s reputation", amount, user.getName(), repType);
+                ReputationChangeResult result = ReputationHandler.addRep(user, repType);
+                if(result.successful())
+                    reply(event, "Added %s to %s's %s reputation.\nThey now have %s %s reputation",
+                            amount, user.getName(), repType, result.getReputation().getType(repType), repType);
                 break;
             case "remove":
-
+                if(args.length < 3 || (repType = ReputationType.fromString(args[2])) == null)
+                {
+                    fail(event, "Missing whether to change good or bad reputation!");
+                    return;
+                }
+                if(args.length >= 4)
+                {
+                    try
+                    {
+                        amount = Long.parseLong(args[3]);
+                    }
+                    catch(NumberFormatException e)
+                    {
+                        fail(event, "%s is not a number!", args[3]);
+                        return;
+                    }
+                }
+                Reputation reputation = ReputationHandler.subRep(user, repType, amount);
+                reply(event, "Deducted %s from %s's %s reputation.\nThey now have %s %s reputation",
+                        amount, user.getName(), repType, reputation.getType(repType));
                 break;
             case "reset":
 

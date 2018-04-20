@@ -45,17 +45,39 @@ public class ReputationHandler
     /**
      * Tries to add 1 reputation for the user and returns the result
      */
-    public static boolean addRep(User user, @NotNull ReputationType type)
+    public static ReputationChangeResult addRep(User user, @NotNull ReputationType type)
     {
         return addRep(user, type, 1);
     }
 
-    public static boolean addRep(User user, @NotNull ReputationType type, int amount)
+    /**
+     * Tries to add 1 reputation for the user and returns the result
+     */
+    public static ReputationChangeResult addRep(User user, @NotNull ReputationType type, long amount)
     {
         Reputation rep = getRep(user);
         boolean success = rep.increase(type, amount);
         if(success) putRepInternal(rep);
-        return success;
+        return new ReputationChangeResult(rep, success);
+    }
+
+    /**
+     * Deducts 1 reputation from the user and returns the reputation
+     */
+    public static Reputation subRep(User user, @NotNull ReputationType type)
+    {
+        return subRep(user, type, 1);
+    }
+
+    /**
+     * Deducts 1 reputation from the user and returns the reputation
+     */
+    public static Reputation subRep(User user, @NotNull ReputationType type, long amount)
+    {
+        Reputation rep = getRep(user);
+        rep.decrease(type);
+        putRepInternal(rep);
+        return rep;
     }
 
     /**
