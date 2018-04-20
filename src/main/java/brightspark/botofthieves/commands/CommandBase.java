@@ -35,7 +35,7 @@ public abstract class CommandBase extends Command
 
     protected abstract void doCommand(CommandEvent event);
 
-    public static String[] splitArgs(String args)
+    protected static String[] splitArgs(String args)
     {
         return args.split("\\s+");
     }
@@ -44,7 +44,7 @@ public abstract class CommandBase extends Command
      * Gets the member from the guild if they exist.
      * @param memberString Can be either the member's display name or their @ mention.
      */
-    public Member getMemberFromString(CommandEvent event, Guild guild, String memberString)
+    protected Member getMemberFromString(CommandEvent event, String memberString)
     {
         Member member = null;
 
@@ -55,13 +55,13 @@ public abstract class CommandBase extends Command
         try
         {
             //Try parse argument as a user ID
-            member = guild.getMemberById(memberString);
+            member = event.getGuild().getMemberById(memberString);
             if(member == null) fail(event, "Couldn't find member '%s'", memberString);
         }
         catch(NumberFormatException e)
         {
             //Try parse argument as a member name
-            List<Member> members = guild.getMembersByEffectiveName(memberString, true);
+            List<Member> members = event.getGuild().getMembersByEffectiveName(memberString, true);
             if(!members.isEmpty())
             {
                 if(members.size() > 1)

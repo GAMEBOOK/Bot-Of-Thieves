@@ -14,7 +14,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.Set;
+import java.util.Collection;
 
 public class JsonHandler<T>
 {
@@ -41,12 +41,12 @@ public class JsonHandler<T>
         {
             LOG.error("Error creating file " + file.getAbsolutePath(), e);
         }
-        this.type = new TypeToken<Set<T>>(){}.getType();
+        this.type = new TypeToken<Collection<T>>(){}.getType();
     }
 
-    public Set<T> read()
+    public Collection<T> read()
     {
-        Set<T> set = null;
+        Collection<T> set = null;
         try(JsonReader reader = new JsonReader(new FileReader(file)))
         {
             set = GSON.fromJson(reader, type);
@@ -58,11 +58,11 @@ public class JsonHandler<T>
         return set;
     }
 
-    public void write(Set<T> set)
+    public void write(Collection<T> values)
     {
         try(JsonWriter writer = new JsonWriter(new FileWriter(file)))
         {
-            GSON.toJson(set, type, writer);
+            GSON.toJson(values, type, writer);
         }
         catch(IOException e)
         {

@@ -1,5 +1,7 @@
 package brightspark.botofthieves.data;
 
+import brightspark.botofthieves.util.Utils;
+import com.sun.istack.internal.NotNull;
 import net.dv8tion.jda.core.entities.User;
 
 public class Reputation
@@ -8,52 +10,93 @@ public class Reputation
     private int good, bad;
     private Long banEnd;
 
-    public Reputation(User user)
+    public Reputation(@NotNull User user)
     {
         userId = user.getIdLong();
     }
 
+    /**
+     * Sets the amount of good reputation
+     */
     public void setGood(int num)
     {
         good = num;
     }
 
+    /**
+     * Gets the amount of good reputation
+     */
     public int getGood()
     {
         return good;
     }
 
+    /**
+     * Sets the amount of bad reputation
+     */
     public void setBad(int num)
     {
         bad = num;
     }
 
+    /**
+     * Gets the amount of bad reputation
+     */
     public int getBad()
     {
         return bad;
     }
 
-    public void increase(boolean isGood)
+    /**
+     * Gets the total reputation (good - bad)
+     */
+    public int getTotal()
     {
-        increase(isGood, 1);
+        return good - bad;
     }
 
-    public void increase(boolean isGood, int amount)
+    /**
+     * Increase the given type of reputation by 1 if not banned
+     * Returns false if the user is banned and therefore no change is made
+     */
+    public boolean increase(@NotNull ReputationType type)
     {
-        if(isGood)
+        return increase(type, 1);
+    }
+
+    /**
+     * Increase the given type of reputation if not banned
+     * Returns false if the user is banned and therefore no change is made
+     */
+    public boolean increase(@NotNull ReputationType type, int amount)
+    {
+        if(type.isGood())
+        {
+            if(getBan() != null) return false;
             good += amount;
+            return true;
+        }
+        bad += amount;
+        return true;
+    }
+
+    /**
+     * Decreases the given type of reputation by 1
+     */
+    public void decrease(@NotNull ReputationType type)
+    {
+        decrease(type, 1);
+    }
+
+    /**
+     * Decreases the given type of reputation
+     */
+    public void decrease(@NotNull ReputationType type, int amount)
+    {
+        if(type.isGood())
+            good -= amount;
         else
-            bad += amount;
-    }
-
-    public void decrease(boolean isGood)
-    {
-        decrease(isGood, 1);
-    }
-
-    public void decrease(boolean isGood, int amount)
-    {
-        increase(isGood, -amount);
+            bad -= amount;
     }
 
     /**
@@ -65,27 +108,39 @@ public class Reputation
     }
 
     /**
-     * Sets the time to ban the user from positive reputation till
+     * Sets the amount of time to ban the user from positive reputation for
+     * Returns false if a ban was already active
      */
     public boolean ban(long timeMillis)
     {
-        if(banEnd != null) return false;
-        banEnd = timeMillis;
+        if(getBan() != null) return false;
+        banEnd = System.currentTimeMillis() + timeMillis;
         return true;
     }
 
+    /**
+     * Validates the current ban and then returns it
+     */
     public Long getBan()
     {
+        if(banEnd != null && System.currentTimeMillis() > banEnd)
+            banEnd = null;
         return banEnd;
     }
 
+    /**
+     * Removes the ban if one exists and returns if there was a ban
+     */
     public boolean removeBan()
     {
-        boolean hasBan = banEnd != null;
+        boolean hasBan = getBan() != null;
         banEnd = null;
         return hasBan;
     }
 
+    /**
+     * Gets the user ID this reputation is for
+     */
     public long getUserId()
     {
         return userId;
@@ -97,6 +152,7 @@ public class Reputation
     public String getText()
     {
         //Green Heart, Skull and Crossbones, Minus Sign
-        return String.format("\uD83D\uDC9A %s \uD83D\uDC80 %s \u2796 %s", good, bad, getRatio());
+        return String.format("%s %s %s %s %s %s",
+                Utils.EMOJI_GREEN_HEART, good, Utils.EMOJI_NAME_BADGE, bad, Utils.EMOJI_ANCHOR, getRatio());
     }
 }

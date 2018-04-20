@@ -3,15 +3,26 @@ package brightspark.botofthieves.util;
 import brightspark.botofthieves.BotOfThieves;
 import brightspark.botofthieves.Config;
 import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.MessageEmbed;
+import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.entities.User;
 
 import javax.annotation.Nullable;
 import java.awt.*;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 public class Utils
 {
+    public static final String EMOJI_GREEN_HEART = "\uD83D\uDC9A";
+    public static final String EMOJI_NAME_BADGE = "\uD83D\uDCDB";
+    public static final String EMOJI_ANCHOR = "\u2693";
+    public static final String EMOJI_SKULL_CROSSBONES = "\uD83D\uDC80";
+    public static final String EMOJI_SAILBOAT = "\u26F5";
+
     public static String getFullUser(User user)
     {
         return user.getName() + "#" + user.getDiscriminator();
@@ -95,5 +106,42 @@ public class Utils
         if(description != null)
             builder.setDescription(description);
         return builder.build();
+    }
+
+    public static Duration extractDurationFromTimes(String times)
+    {
+        Duration duration = Duration.ZERO;
+        String[] split = times.split(" ");
+        for(String s : split)
+        {
+            if(s.matches("\\d+[smhd]"))
+                duration = duration.plus(Integer.parseInt(s.substring(0, s.length() - 1)), extractUnitFromTime(s));
+            else
+                return null;
+        }
+        return duration;
+    }
+
+    public static ChronoUnit extractUnitFromTime(String time)
+    {
+        char unitChar = time.toLowerCase().charAt(time.length() - 1);
+        switch(unitChar)
+        {
+            case 's':   return ChronoUnit.SECONDS;
+            case 'm':   return ChronoUnit.MINUTES;
+            case 'h':   return ChronoUnit.HOURS;
+            case 'd':   return ChronoUnit.DAYS;
+            default:    return null;
+        }
+    }
+
+    /**
+     * Capitalises the first letter of the string
+     */
+    public static String capitaliseFirstLetter(String text)
+    {
+        if(text == null || text.length() <= 0)
+            return text;
+        return text.substring(0, 1).toUpperCase() + text.substring(1);
     }
 }

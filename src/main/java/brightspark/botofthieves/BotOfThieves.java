@@ -1,6 +1,7 @@
 package brightspark.botofthieves;
 
 import brightspark.botofthieves.commands.CommandHello;
+import brightspark.botofthieves.commands.CommandReputation;
 import brightspark.botofthieves.util.Utils;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
@@ -64,10 +65,11 @@ public class BotOfThieves
                         new CommandClientBuilder()
                                 .setGame(Game.playing("Testing!"))
                                 .setOwnerId(Config.get("owner_id"))
-                                .setEmojis("\u26F5", "\u2693", "\u2620") //Sailboat, Anchor, Skull and Crossbones
+                                .setEmojis(Utils.EMOJI_SAILBOAT, Utils.EMOJI_ANCHOR, Utils.EMOJI_SKULL_CROSSBONES)
                                 .setPrefix(PREFIX)
                                 .addCommands(
-                                        new CommandHello()
+                                        new CommandHello(),
+                                        new CommandReputation()
                                 ).build()
                 ).buildAsync();
 
