@@ -3,7 +3,6 @@ package brightspark.botofthieves.commands;
 import brightspark.botofthieves.util.Utils;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 import org.apache.logging.log4j.LogManager;

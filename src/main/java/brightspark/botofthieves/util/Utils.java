@@ -10,6 +10,7 @@ import net.dv8tion.jda.core.entities.User;
 
 import javax.annotation.Nullable;
 import java.awt.*;
+import java.text.NumberFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -143,5 +144,10 @@ public class Utils
         if(text == null || text.length() <= 0)
             return text;
         return text.substring(0, 1).toUpperCase() + text.substring(1);
+    }
+
+    public static String commaSeparate(long num)
+    {
+        return NumberFormat.getIntegerInstance().format(num);
     }
 }

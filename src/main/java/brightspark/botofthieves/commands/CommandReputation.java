@@ -4,6 +4,7 @@ import brightspark.botofthieves.data.Reputation;
 import brightspark.botofthieves.data.ReputationChangeResult;
 import brightspark.botofthieves.data.ReputationHandler;
 import brightspark.botofthieves.data.ReputationType;
+import brightspark.botofthieves.util.Utils;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
@@ -54,7 +55,8 @@ public class CommandReputation extends CommandBase
                 ReputationChangeResult result = ReputationHandler.addRep(user, repType);
                 if(result.successful())
                     reply(event, "Added %s to %s's %s reputation.\nThey now have %s %s reputation",
-                            amount, user.getName(), repType, result.getReputation().getType(repType), repType);
+                            Utils.commaSeparate(amount), user.getName(), repType,
+                            Utils.commaSeparate(result.getReputation().getType(repType)), repType);
                 break;
             case "remove":
                 if(args.length < 3 || (repType = ReputationType.fromString(args[2])) == null)
@@ -76,7 +78,8 @@ public class CommandReputation extends CommandBase
                 }
                 Reputation reputation = ReputationHandler.subRep(user, repType, amount);
                 reply(event, "Deducted %s from %s's %s reputation.\nThey now have %s %s reputation",
-                        amount, user.getName(), repType, reputation.getType(repType));
+                        Utils.commaSeparate(amount), user.getName(), repType,
+                        Utils.commaSeparate(reputation.getType(repType)));
                 break;
             case "reset":
 
