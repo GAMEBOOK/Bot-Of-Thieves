@@ -2,6 +2,7 @@ package brightspark.botofthieves;
 
 import brightspark.botofthieves.commands.CommandHello;
 import brightspark.botofthieves.commands.CommandReputation;
+import brightspark.botofthieves.commands.CommandStats;
 import brightspark.botofthieves.util.Utils;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
@@ -18,6 +19,7 @@ import org.apache.logging.log4j.Logger;
 import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.net.MalformedURLException;
+import java.util.List;
 
 public class BotOfThieves
 {
@@ -69,7 +71,8 @@ public class BotOfThieves
                                 .setPrefix(PREFIX)
                                 .addCommands(
                                         new CommandHello(),
-                                        new CommandReputation()
+                                        new CommandReputation(),
+                                        new CommandStats()
                                 ).build()
                 ).buildAsync();
 
@@ -83,5 +86,14 @@ public class BotOfThieves
         String logChannel = Config.get("log_channel_name");
         if(!logChannel.isEmpty())
             LOG_CHANNEL = Utils.findTextChannel(logChannel);
+
+        String adminRole = Config.get("bot_admin_role");
+        if(!adminRole.isEmpty())
+        {
+            //TODO: This isn't finding the role?
+            List<Role> roles = JDA.getRolesByName(adminRole, false);
+            if(roles.size() > 0)
+                ADMIN_ROLE = roles.get(0);
+        }
     }
 }

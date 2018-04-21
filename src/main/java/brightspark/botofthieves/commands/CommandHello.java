@@ -10,7 +10,7 @@ public class CommandHello extends CommandBase
     }
 
     @Override
-    protected void doCommand(CommandEvent event)
+    protected void doCommand(CommandEvent event, String... args)
     {
         event.reply("Arrr Matey!");
     }

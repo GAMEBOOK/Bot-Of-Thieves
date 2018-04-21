@@ -1,10 +1,12 @@
 package brightspark.botofthieves.commands;
 
+import brightspark.botofthieves.BotOfThieves;
 import brightspark.botofthieves.util.Utils;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageEmbed;
+import net.dv8tion.jda.core.entities.Role;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,14 +31,14 @@ public abstract class CommandBase extends Command
         debug("Executing command '%s'", event.getMessage().getContentRaw());
         if(removeSentMessage)
             event.getMessage().delete().queue();
-        doCommand(event);
+        doCommand(event, splitArgs(event.getArgs()));
     }
 
-    protected abstract void doCommand(CommandEvent event);
+    protected abstract void doCommand(CommandEvent event, String... args);
 
-    protected static String[] splitArgs(String args)
+    private static String[] splitArgs(String args)
     {
-        return args.split("\\s+");
+        return args.isEmpty() ? new String[] {} : args.split("\\s+");
     }
 
     /**
@@ -66,7 +68,7 @@ public abstract class CommandBase extends Command
                 if(members.size() > 1)
                 {
                     fail(event, "Found %s members with the name '%s'.\n" +
-                            "Please use `@` mention the user with this command instead.", members.size(), memberString);
+                            "Please `@` mention the user with this command instead.", members.size(), memberString);
                 }
                 else
                     member = members.get(0);
@@ -76,14 +78,23 @@ public abstract class CommandBase extends Command
         return member;
     }
 
-    protected void reply(CommandEvent event, String message, Object... args)
+    protected boolean checkMemberPerms(Member member)
     {
-        event.getChannel().sendMessage(Utils.createBotMessage(event.getGuild(), message, args)).queue();
+        if(member.isOwner()) return true;
+        for(Role role : member.getRoles())
+            if(role.equals(BotOfThieves.ADMIN_ROLE))
+                return true;
+        return false;
     }
 
-    protected void reply(CommandEvent event, String title, String description, Object...args)
+    protected void reply(CommandEvent event, String message, boolean bold)
     {
-        event.getChannel().sendMessage(Utils.createBotMessage(event.getGuild(), title, String.format(description, args))).queue();
+        event.getChannel().sendMessage(Utils.createBotMessage(event.getGuild(), message, bold)).queue();
+    }
+
+    protected void reply(CommandEvent event, String title, String description)
+    {
+        event.getChannel().sendMessage(Utils.createBotMessage(event.getGuild(), title, description)).queue();
     }
 
     protected void reply(CommandEvent event, MessageEmbed message)
@@ -102,7 +113,7 @@ public abstract class CommandBase extends Command
      */
     protected void fail(CommandEvent event, @Nullable String message, Object... args)
     {
-        if(message != null) reply(event, message, args);
+        if(message != null) reply(event, String.format(message, args), true);
         fail(event);
     }
 

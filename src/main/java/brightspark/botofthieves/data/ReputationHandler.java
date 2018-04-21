@@ -1,5 +1,6 @@
 package brightspark.botofthieves.data;
 
+import com.google.gson.reflect.TypeToken;
 import com.sun.istack.internal.NotNull;
 import net.dv8tion.jda.core.entities.User;
 import org.apache.logging.log4j.LogManager;
@@ -13,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 public class ReputationHandler
 {
     private static final Logger LOG = LogManager.getLogger();
-    private static final JsonHandler<Reputation> jsonHandler = new JsonHandler<>("reputation");
+    private static final JsonHandler<Reputation> jsonHandler = new JsonHandler<>("reputation", new TypeToken<Reputation>(){});
     private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
     private static Map<Long, Reputation> REPUTATION = new HashMap<>();
@@ -32,12 +33,12 @@ public class ReputationHandler
             }, 5, 5, TimeUnit.MINUTES);
     }
 
-    private static void putRepInternal(Reputation rep)
+    private static void putRep(Reputation rep)
     {
         REPUTATION.put(rep.getUserId(), rep);
     }
 
-    private static Reputation getRep(User user)
+    public static Reputation getRep(User user)
     {
         return REPUTATION.getOrDefault(user.getIdLong(), new Reputation(user));
     }
@@ -57,7 +58,7 @@ public class ReputationHandler
     {
         Reputation rep = getRep(user);
         boolean success = rep.increase(type, amount);
-        if(success) putRepInternal(rep);
+        if(success) putRep(rep);
         return new ReputationChangeResult(rep, success);
     }
 
@@ -75,8 +76,8 @@ public class ReputationHandler
     public static Reputation subRep(User user, @NotNull ReputationType type, long amount)
     {
         Reputation rep = getRep(user);
-        rep.decrease(type);
-        putRepInternal(rep);
+        rep.decrease(type, amount);
+        putRep(rep);
         return rep;
     }
 
@@ -90,7 +91,7 @@ public class ReputationHandler
             rep.setGood(amount);
         else
             rep.setBad(amount);
-        putRepInternal(rep);
+        putRep(rep);
         return rep;
     }
 
@@ -108,6 +109,16 @@ public class ReputationHandler
     public static boolean ban(User user, long timeMillis)
     {
         Reputation rep = getRep(user);
-        return rep.ban(timeMillis);
+        boolean success = rep.ban(timeMillis);
+        putRep(rep);
+        return success;
+    }
+
+    public static boolean removeBan(User user)
+    {
+        Reputation rep = getRep(user);
+        boolean success = rep.removeBan();
+        putRep(rep);
+        return success;
     }
 }

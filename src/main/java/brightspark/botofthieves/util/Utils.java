@@ -11,10 +11,9 @@ import net.dv8tion.jda.core.entities.User;
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.text.NumberFormat;
-import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class Utils
 {
@@ -82,17 +81,17 @@ public class Utils
     /**
      * Creates an embedded message for the bot to send (uses the bot's main role colour)
      */
-    public static MessageEmbed createBotMessage(Guild guild, String message, Object... args)
+    public static MessageEmbed createBotMessage(Guild guild, String message, boolean bold)
     {
-        return createEmbedMessage(getBotColour(guild), String.format(message, args), null);
+        return createEmbedMessage(getBotColour(guild), bold ? message : null, bold ? null : message);
     }
 
     /**
      * Creates an embedded message for the bot to send (uses the bot's main role colour)
      */
-    public static MessageEmbed createBotMessage(Guild guild, String title, String description, Object... args)
+    public static MessageEmbed createBotMessage(Guild guild, String title, String description)
     {
-        return createEmbedMessage(getBotColour(guild), title, String.format(description, args));
+        return createEmbedMessage(getBotColour(guild), title, description);
     }
 
     /**
@@ -109,29 +108,45 @@ public class Utils
         return builder.build();
     }
 
-    public static Duration extractDurationFromTimes(String times)
+    public static String millisTimeToReadable(long millis)
     {
-        Duration duration = Duration.ZERO;
+        long hours = TimeUnit.MILLISECONDS.toHours(millis);
+        millis -= TimeUnit.HOURS.toMillis(hours);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
+
+        if(hours == 0)
+            return String.format("%d minutes", minutes);
+        else
+            return String.format("%d hours, %d minutes", hours, minutes);
+    }
+
+    public static long extractMillisFromTimes(String times)
+    {
+        long time = 0;
         String[] split = times.split(" ");
         for(String s : split)
         {
             if(s.matches("\\d+[smhd]"))
-                duration = duration.plus(Integer.parseInt(s.substring(0, s.length() - 1)), extractUnitFromTime(s));
+            {
+                TimeUnit unit = extractUnitFromTime(s);
+                if(unit == null) return - 1;
+                time += unit.toMillis(Integer.parseInt(s.substring(0, s.length() - 1)));
+            }
             else
-                return null;
+                return -1;
         }
-        return duration;
+        return time;
     }
 
-    public static ChronoUnit extractUnitFromTime(String time)
+    public static TimeUnit extractUnitFromTime(String time)
     {
         char unitChar = time.toLowerCase().charAt(time.length() - 1);
         switch(unitChar)
         {
-            case 's':   return ChronoUnit.SECONDS;
-            case 'm':   return ChronoUnit.MINUTES;
-            case 'h':   return ChronoUnit.HOURS;
-            case 'd':   return ChronoUnit.DAYS;
+            case 's':   return TimeUnit.SECONDS;
+            case 'm':   return TimeUnit.MINUTES;
+            case 'h':   return TimeUnit.HOURS;
+            case 'd':   return TimeUnit.DAYS;
             default:    return null;
         }
     }
@@ -149,5 +164,21 @@ public class Utils
     public static String commaSeparate(long num)
     {
         return NumberFormat.getIntegerInstance().format(num);
+    }
+
+    public static String joinStrings(String[] array, int start)
+    {
+        return joinStrings(array, start, array.length);
+    }
+
+    public static String joinStrings(String[] array, int start, int end)
+    {
+        StringBuilder sb = new StringBuilder();
+        for(int i = start; i < end; i++)
+        {
+            if(i > start) sb.append(" ");
+            sb.append(array[i]);
+        }
+        return sb.toString();
     }
 }

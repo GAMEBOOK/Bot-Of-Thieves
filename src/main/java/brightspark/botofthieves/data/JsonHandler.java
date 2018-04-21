@@ -15,6 +15,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.HashSet;
 
 public class JsonHandler<T>
 {
@@ -24,12 +25,12 @@ public class JsonHandler<T>
     private final File file;
     private final Type type;
 
-    public JsonHandler(String fileName)
+    public JsonHandler(String fileName, TypeToken type)
     {
-        this(new File(BotOfThieves.DATA_DIR, fileName + ".json"));
+        this(new File(BotOfThieves.DATA_DIR, fileName + ".json"), type);
     }
 
-    public JsonHandler(File file)
+    public JsonHandler(File file, TypeToken type)
     {
         this.file = file;
         try
@@ -41,7 +42,7 @@ public class JsonHandler<T>
         {
             LOG.error("Error creating file " + file.getAbsolutePath(), e);
         }
-        this.type = new TypeToken<Collection<T>>(){}.getType();
+        this.type = type.getType();
     }
 
     public Collection<T> read()
@@ -55,7 +56,7 @@ public class JsonHandler<T>
         {
             LOG.error("Error reading from JSON file " + file.getAbsolutePath(), e);
         }
-        return set;
+        return set == null ? new HashSet<>() : set;
     }
 
     public void write(Collection<T> values)

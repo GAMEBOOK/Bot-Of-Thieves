@@ -117,7 +117,7 @@ public class Reputation
      */
     public double getRatio()
     {
-        return (double) (good + bad) / (double) good;
+        return (double) good / (double) (good + bad);
     }
 
     /**
@@ -136,9 +136,10 @@ public class Reputation
      */
     public Long getBan()
     {
-        if(banEnd != null && System.currentTimeMillis() > banEnd)
+        long curTime = System.currentTimeMillis();
+        if(banEnd != null && curTime > banEnd)
             banEnd = null;
-        return banEnd;
+        return banEnd == null ? null : banEnd - curTime;
     }
 
     /**
@@ -164,8 +165,12 @@ public class Reputation
      */
     public String getText()
     {
-        //Green Heart, Skull and Crossbones, Minus Sign
-        return String.format("%s %s %s %s %s %s",
-                Utils.EMOJI_GREEN_HEART, good, Utils.EMOJI_NAME_BADGE, bad, Utils.EMOJI_ANCHOR, Math.round(getRatio() * 100));
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("%s %s %s %s %s %s",
+                Utils.EMOJI_GREEN_HEART, good, Utils.EMOJI_NAME_BADGE, bad, Utils.EMOJI_ANCHOR, Math.round(getRatio() * 100)));
+        Long ban = getBan();
+        if(ban != null)
+            sb.append("\n").append(String.format("Banned for %s", Utils.millisTimeToReadable(ban)));
+        return sb.toString();
     }
 }
