@@ -3,8 +3,8 @@ package brightspark.botofthieves.data;
 import com.google.gson.reflect.TypeToken;
 import com.sun.istack.internal.NotNull;
 import net.dv8tion.jda.core.entities.User;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ReputationHandler
 {
-    private static final Logger LOG = LogManager.getLogger();
+    private static final Logger LOG = LoggerFactory.getLogger(ReputationHandler.class);
     private static final JsonHandler<Reputation> jsonHandler = new JsonHandler<>("reputation", new TypeToken<Reputation>(){});
     private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
@@ -36,6 +36,13 @@ public class ReputationHandler
     private static void putRep(Reputation rep)
     {
         REPUTATION.put(rep.getUserId(), rep);
+    }
+
+    public static int forceSave()
+    {
+        Collection<Reputation> values = new HashSet<>(REPUTATION.values());
+        jsonHandler.write(values);
+        return values.size();
     }
 
     public static Reputation getRep(User user)

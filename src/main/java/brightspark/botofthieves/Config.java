@@ -1,14 +1,14 @@
 package brightspark.botofthieves;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
 
 public class Config
 {
-    private static Logger LOG = LogManager.getLogger();
+    private static Logger LOG = LoggerFactory.getLogger(Config.class);
     private static Map<String, String> CONFIG = new HashMap<>();
 
     private static void checkFile()

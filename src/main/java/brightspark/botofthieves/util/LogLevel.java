@@ -1,6 +1,6 @@
 package brightspark.botofthieves.util;
 
-import org.apache.logging.log4j.Level;
+import org.slf4j.event.Level;
 
 import java.awt.*;
 

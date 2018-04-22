@@ -13,8 +13,8 @@ import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.TextChannel;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.security.auth.login.LoginException;
 import java.io.File;
@@ -23,11 +23,12 @@ import java.util.List;
 
 public class BotOfThieves
 {
+    public static File RESOURCES_DIR = new File("src/main/resources");
     public static File CONFIG_FILE = new File("config.properties");
-    public static File LOG4J_PROP_FILE = new File("log4j.properties");
+    public static File LOG4J_PROP_FILE = new File(RESOURCES_DIR, "log4j.properties");
     public static File DATA_DIR = new File("data");
 
-    public static Logger LOG = LogManager.getLogger();
+    public static Logger LOG = LoggerFactory.getLogger(BotOfThieves.class);
     public static JDA JDA;
     public static EventWaiter WAITER = new EventWaiter();
     public static String PREFIX;
@@ -59,26 +60,28 @@ public class BotOfThieves
 
         PREFIX = Config.get("command_prefix", "!");
 
-        JDA = new JDABuilder(AccountType.BOT)
-                .setToken(Config.get("token"))
-                .setStatus(OnlineStatus.DO_NOT_DISTURB)
-                .setGame(Game.playing("Loading..."))
-                .addEventListener(
-                        new CommandClientBuilder()
-                                .setGame(Game.playing("Testing!"))
-                                .setOwnerId(Config.get("owner_id"))
-                                .setEmojis(Utils.EMOJI_SAILBOAT, Utils.EMOJI_ANCHOR, Utils.EMOJI_SKULL_CROSSBONES)
-                                .setPrefix(PREFIX)
-                                .addCommands(
-                                        new CommandHello(),
-                                        new CommandReputation(),
-                                        new CommandStats()
-                                ).build()
-                ).buildAsync();
-
-        CommandClientBuilder builder = new CommandClientBuilder();
-        builder.setGame(Game.playing("Testing!"))
-                .setOwnerId(Config.get("owner_id"));
+        try
+        {
+            JDA = new JDABuilder(AccountType.BOT)
+                    .setToken(Config.get("token"))
+                    .setStatus(OnlineStatus.DO_NOT_DISTURB)
+                    .setGame(Game.playing("Loading..."))
+                    .addEventListener(new CommandClientBuilder()
+                            .setGame(Game.playing("Testing!"))
+                            .setOwnerId(Config.get("owner_id"))
+                            .setEmojis(Utils.EMOJI_SAILBOAT, Utils.EMOJI_ANCHOR, Utils.EMOJI_SKULL_CROSSBONES)
+                            .setPrefix(PREFIX)
+                            .addCommands(
+                                    new CommandHello(),
+                                    new CommandReputation(),
+                                    new CommandStats()
+                            ).build()
+                    ).buildBlocking();
+        }
+        catch(InterruptedException e)
+        {
+            e.printStackTrace();
+        }
 
         //Save incase any defaults were set
         Config.save();
@@ -90,10 +93,11 @@ public class BotOfThieves
         String adminRole = Config.get("bot_admin_role");
         if(!adminRole.isEmpty())
         {
-            //TODO: This isn't finding the role?
             List<Role> roles = JDA.getRolesByName(adminRole, false);
             if(roles.size() > 0)
                 ADMIN_ROLE = roles.get(0);
         }
+
+        LOG.info("Bot initialisation finished");
     }
 }

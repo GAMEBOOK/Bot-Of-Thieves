@@ -21,7 +21,15 @@ public class CommandReputation extends CommandBase
     @Override
     protected void doCommand(CommandEvent event, String... args)
     {
-        if(args.length < 2)
+        String arg0 = args[0].toLowerCase();
+
+        if(arg0.equals("forcesave"))
+        {
+            int numSaved = ReputationHandler.forceSave();
+            reply(event, String.format("Saved %s reputations to file", numSaved), true);
+            return;
+        }
+        else if(args.length < 2)
         {
             fail(event, "Insufficient arguments");
             return;
@@ -30,7 +38,6 @@ public class CommandReputation extends CommandBase
         Member member = getMemberFromString(event, args[1]);
         if(member == null) return;
 
-        String arg0 = args[0].toLowerCase();
         if(!checkMemberPerms(member))
         {
             fail(event, "You do not have permission to use this command!");
