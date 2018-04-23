@@ -33,6 +33,29 @@ public class JsonHandler<T>
     public JsonHandler(File file, TypeToken type)
     {
         this.file = file;
+        this.type = type.getType();
+    }
+
+    public Collection<T> read()
+    {
+        Collection<T> set = null;
+        if(file.exists())
+        {
+            try(JsonReader reader = new JsonReader(new FileReader(file)))
+            {
+                set = GSON.fromJson(reader, type);
+            }
+            catch(IOException e)
+            {
+                LOG.error("Error reading from JSON file " + file.getAbsolutePath(), e);
+            }
+        }
+        return set == null ? new HashSet<>() : set;
+    }
+
+    public void write(Collection<T> values)
+    {
+        if(values.size() == 0) return;
         try
         {
             if(!file.exists() && file.createNewFile())
@@ -42,25 +65,7 @@ public class JsonHandler<T>
         {
             LOG.error("Error creating file " + file.getAbsolutePath(), e);
         }
-        this.type = type.getType();
-    }
 
-    public Collection<T> read()
-    {
-        Collection<T> set = null;
-        try(JsonReader reader = new JsonReader(new FileReader(file)))
-        {
-            set = GSON.fromJson(reader, type);
-        }
-        catch(IOException e)
-        {
-            LOG.error("Error reading from JSON file " + file.getAbsolutePath(), e);
-        }
-        return set == null ? new HashSet<>() : set;
-    }
-
-    public void write(Collection<T> values)
-    {
         try(JsonWriter writer = new JsonWriter(new FileWriter(file)))
         {
             GSON.toJson(values, type, writer);

@@ -7,7 +7,7 @@ import net.dv8tion.jda.core.entities.User;
 public class Reputation
 {
     private long userId;
-    private long good, bad;
+    private int good, bad;
     private Long banEnd;
 
     public Reputation(@NotNull User user)
@@ -26,7 +26,7 @@ public class Reputation
     /**
      * Gets the amount of good reputation
      */
-    public long getGood()
+    public int getGood()
     {
         return good;
     }
@@ -42,7 +42,7 @@ public class Reputation
     /**
      * Gets the amount of bad reputation
      */
-    public long getBad()
+    public int getBad()
     {
         return bad;
     }
@@ -50,7 +50,7 @@ public class Reputation
     /**
      * Gets the amount of reputation of the type specified
      */
-    public long getType(@NotNull ReputationType type)
+    public int getType(@NotNull ReputationType type)
     {
         switch(type)
         {
@@ -63,7 +63,7 @@ public class Reputation
     /**
      * Gets the total reputation (good - bad)
      */
-    public long getTotal()
+    public int getTotal()
     {
         return good - bad;
     }
@@ -81,7 +81,7 @@ public class Reputation
      * Increase the given type of reputation if not banned
      * Returns false if the user is banned and therefore no change is made
      */
-    public boolean increase(@NotNull ReputationType type, long amount)
+    public boolean increase(@NotNull ReputationType type, int amount)
     {
         if(type.isGood())
         {
@@ -104,7 +104,7 @@ public class Reputation
     /**
      * Decreases the given type of reputation
      */
-    public void decrease(@NotNull ReputationType type, long amount)
+    public void decrease(@NotNull ReputationType type, int amount)
     {
         if(type.isGood())
             good = Math.max(0, good - amount);
@@ -115,9 +115,9 @@ public class Reputation
     /**
      * Gets a number between 0 and 1 representing the ratio of good to bad reputation earned
      */
-    public double getRatio()
+    public float getRatio()
     {
-        return (double) good / (double) (good + bad);
+        return (float) good / (float) (good + bad);
     }
 
     /**

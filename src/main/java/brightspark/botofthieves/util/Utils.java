@@ -3,10 +3,7 @@ package brightspark.botofthieves.util;
 import brightspark.botofthieves.BotOfThieves;
 import brightspark.botofthieves.Config;
 import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.MessageEmbed;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.entities.*;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -49,10 +46,28 @@ public class Utils
         return channelFound;
     }
 
+    public static Role findRole(String role)
+    {
+        Role roleFound = null;
+        try
+        {
+            long roleId = Long.parseLong(role);
+            roleFound = BotOfThieves.JDA.getRoleById(roleId);
+            if(roleFound == null) BotOfThieves.LOG.warn("Role with ID " + role + " not found");
+        }
+        catch(NumberFormatException e)
+        {
+            List<Role> roles = BotOfThieves.JDA.getRolesByName(role, false);
+            if(!roles.isEmpty()) roleFound = roles.get(0);
+            else BotOfThieves.LOG.warn("Role '" + role + "' not found");
+        }
+        return roleFound;
+    }
+
     /**
      * Logs to the assigned log channel if it has been set
      */
-    public static void logChannel(LogLevel level, User author, String text, Object... args)
+    public static void logChannel(LogLevel level, User author, String text)
     {
         if(BotOfThieves.LOG_CHANNEL != null && level.isHigherThanOrEqualTo(Config.get("log_level", "error")))
         {
@@ -62,15 +77,15 @@ public class Utils
             message.setColor(level.colour);
             message.setAuthor(getFullUser(author), null, author.getEffectiveAvatarUrl());
             message.setTitle(level.toString());
-            message.setDescription(String.format(text, args));
+            message.setDescription(text);
             message.setTimestamp(Instant.now());
             BotOfThieves.LOG_CHANNEL.sendMessage(message.build()).queue();
         }
     }
 
-    public static void logChannel(LogLevel level, String text, Object... args)
+    public static void logChannel(LogLevel level, String text)
     {
-        logChannel(level, null, text, args);
+        logChannel(level, null, text);
     }
 
     public static Color getBotColour(Guild guild)

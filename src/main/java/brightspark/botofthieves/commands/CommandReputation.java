@@ -35,18 +35,18 @@ public class CommandReputation extends CommandBase
             return;
         }
 
-        Member member = getMemberFromString(event, args[1]);
-        if(member == null) return;
-
-        if(!checkMemberPerms(member))
+        if(!checkMemberPerms(event.getMember()))
         {
             fail(event, "You do not have permission to use this command!");
             return;
         }
 
+        Member member = getMemberFromString(event, args[1]);
+        if(member == null) return;
+
         User user = member.getUser();
         ReputationType repType;
-        long amount = 1;
+        int amount = 1;
         Reputation reputation;
 
         switch(arg0)
@@ -61,7 +61,7 @@ public class CommandReputation extends CommandBase
                 {
                     try
                     {
-                        amount = Long.parseLong(args[3]);
+                        amount = Integer.parseInt(args[3]);
                     }
                     catch(NumberFormatException e)
                     {
@@ -91,7 +91,7 @@ public class CommandReputation extends CommandBase
                 {
                     try
                     {
-                        amount = Long.parseLong(args[3]);
+                        amount = Integer.parseInt(args[3]);
                     }
                     catch(NumberFormatException e)
                     {

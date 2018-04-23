@@ -1,6 +1,7 @@
 package brightspark.botofthieves.commands;
 
 import brightspark.botofthieves.BotOfThieves;
+import brightspark.botofthieves.util.LogLevel;
 import brightspark.botofthieves.util.Utils;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
@@ -128,21 +129,29 @@ public abstract class CommandBase extends Command
 
     protected void info(String message, Object... args)
     {
-        LOG.info(String.format(message, args));
+        String m = String.format(message, args);
+        LOG.info(m);
+        Utils.logChannel(LogLevel.INFO, m);
     }
 
     protected void debug(String message, Object... args)
     {
-        LOG.debug(String.format(message, args));
+        String m = String.format(message, args);
+        LOG.debug(m);
+        Utils.logChannel(LogLevel.DEBUG, m);
     }
 
     protected void warn(String message, Object... args)
     {
-        LOG.warn(String.format(message, args));
+        String m = String.format(message, args);
+        LOG.warn(m);
+        Utils.logChannel(LogLevel.WARN, m);
     }
 
     protected void error(String message, Object... args)
     {
-        LOG.error(String.format(message, args));
+        String m = String.format(message, args);
+        LOG.error(m);
+        Utils.logChannel(LogLevel.ERROR, m);
     }
 }

@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.net.MalformedURLException;
-import java.util.List;
 
 public class BotOfThieves
 {
@@ -86,17 +85,25 @@ public class BotOfThieves
         //Save incase any defaults were set
         Config.save();
 
-        String logChannel = Config.get("log_channel_name");
+        String logChannel = Config.get("log_channel");
         if(!logChannel.isEmpty())
+        {
             LOG_CHANNEL = Utils.findTextChannel(logChannel);
+            if(LOG_CHANNEL != null)
+                LOG.info(String.format("Set %s (%s) as the bot logging channel", LOG_CHANNEL.getName(), LOG_CHANNEL.getIdLong()));
+        }
+        else
+            LOG.warn("Bot log channel not set");
 
         String adminRole = Config.get("bot_admin_role");
         if(!adminRole.isEmpty())
         {
-            List<Role> roles = JDA.getRolesByName(adminRole, false);
-            if(roles.size() > 0)
-                ADMIN_ROLE = roles.get(0);
+            ADMIN_ROLE = Utils.findRole(adminRole);
+            if(ADMIN_ROLE != null)
+                LOG.info(String.format("Set %s (%s) as the bot admin role", ADMIN_ROLE.getName(), ADMIN_ROLE.getIdLong()));
         }
+        else
+            LOG.warn("Bot admin role not set");
 
         LOG.info("Bot initialisation finished");
     }

@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 public class ReputationHandler
 {
     private static final Logger LOG = LoggerFactory.getLogger(ReputationHandler.class);
-    private static final JsonHandler<Reputation> jsonHandler = new JsonHandler<>("reputation", new TypeToken<Reputation>(){});
+    private static final JsonHandler<Reputation> jsonHandler = new JsonHandler<>("reputation", new TypeToken<Collection<Reputation>>(){});
     private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
     private static Map<Long, Reputation> REPUTATION = new HashMap<>();
@@ -41,7 +41,7 @@ public class ReputationHandler
     public static int forceSave()
     {
         Collection<Reputation> values = new HashSet<>(REPUTATION.values());
-        jsonHandler.write(values);
+        if(values.size() > 0) jsonHandler.write(values);
         return values.size();
     }
 
@@ -61,7 +61,7 @@ public class ReputationHandler
     /**
      * Tries to add 1 reputation for the user and returns the result
      */
-    public static ReputationChangeResult addRep(User user, @NotNull ReputationType type, long amount)
+    public static ReputationChangeResult addRep(User user, @NotNull ReputationType type, int amount)
     {
         Reputation rep = getRep(user);
         boolean success = rep.increase(type, amount);
@@ -80,7 +80,7 @@ public class ReputationHandler
     /**
      * Deducts 1 reputation from the user and returns the reputation
      */
-    public static Reputation subRep(User user, @NotNull ReputationType type, long amount)
+    public static Reputation subRep(User user, @NotNull ReputationType type, int amount)
     {
         Reputation rep = getRep(user);
         rep.decrease(type, amount);
