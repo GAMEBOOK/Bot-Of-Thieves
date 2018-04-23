@@ -1,5 +1,6 @@
-package brightspark.botofthieves.data;
+package brightspark.botofthieves.data.reputation;
 
+import brightspark.botofthieves.data.JsonHandler;
 import com.google.gson.reflect.TypeToken;
 import com.sun.istack.internal.NotNull;
 import net.dv8tion.jda.core.entities.User;

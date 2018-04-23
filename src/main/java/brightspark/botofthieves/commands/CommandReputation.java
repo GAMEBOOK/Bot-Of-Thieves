@@ -1,9 +1,9 @@
 package brightspark.botofthieves.commands;
 
-import brightspark.botofthieves.data.Reputation;
-import brightspark.botofthieves.data.ReputationChangeResult;
-import brightspark.botofthieves.data.ReputationHandler;
-import brightspark.botofthieves.data.ReputationType;
+import brightspark.botofthieves.data.reputation.Reputation;
+import brightspark.botofthieves.data.reputation.ReputationChangeResult;
+import brightspark.botofthieves.data.reputation.ReputationHandler;
+import brightspark.botofthieves.data.reputation.ReputationType;
 import brightspark.botofthieves.util.Utils;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.core.entities.Member;

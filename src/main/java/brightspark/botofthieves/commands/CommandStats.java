@@ -1,6 +1,6 @@
 package brightspark.botofthieves.commands;
 
-import brightspark.botofthieves.data.ReputationHandler;
+import brightspark.botofthieves.data.reputation.ReputationHandler;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;

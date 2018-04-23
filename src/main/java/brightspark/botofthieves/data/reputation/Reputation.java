@@ -1,4 +1,4 @@
-package brightspark.botofthieves.data;
+package brightspark.botofthieves.data.reputation;
 
 import brightspark.botofthieves.util.Utils;
 import com.sun.istack.internal.NotNull;

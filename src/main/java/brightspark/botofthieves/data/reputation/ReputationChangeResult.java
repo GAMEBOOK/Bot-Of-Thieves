@@ -1,4 +1,4 @@
-package brightspark.botofthieves.data;
+package brightspark.botofthieves.data.reputation;
 
 public class ReputationChangeResult
 {
