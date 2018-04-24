@@ -1,8 +1,10 @@
 package brightspark.botofthieves;
 
+import brightspark.botofthieves.commands.CommandCrew;
 import brightspark.botofthieves.commands.CommandHello;
 import brightspark.botofthieves.commands.CommandReputation;
 import brightspark.botofthieves.commands.CommandStats;
+import brightspark.botofthieves.data.reputation.ReputationListener;
 import brightspark.botofthieves.util.Utils;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
@@ -65,7 +67,8 @@ public class BotOfThieves
                     .setToken(Config.get("token"))
                     .setStatus(OnlineStatus.DO_NOT_DISTURB)
                     .setGame(Game.playing("Loading..."))
-                    .addEventListener(new CommandClientBuilder()
+                    .addEventListener(
+                            new CommandClientBuilder()
                             .setGame(Game.playing("Testing!"))
                             .setOwnerId(Config.get("owner_id"))
                             .setEmojis(Utils.EMOJI_SAILBOAT, Utils.EMOJI_ANCHOR, Utils.EMOJI_SKULL_CROSSBONES)
@@ -73,8 +76,10 @@ public class BotOfThieves
                             .addCommands(
                                     new CommandHello(),
                                     new CommandReputation(),
-                                    new CommandStats()
-                            ).build()
+                                    new CommandStats(),
+                                    new CommandCrew()
+                            ).build(),
+                            new ReputationListener()
                     ).buildBlocking();
         }
         catch(InterruptedException e)

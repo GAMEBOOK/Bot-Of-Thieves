@@ -19,6 +19,7 @@ public class ReputationHandler
     private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
     private static Map<Long, Reputation> REPUTATION = new HashMap<>();
+    private static Map<Long, User> DM_RATINGS = new HashMap<>();
 
     static
     {
@@ -33,6 +34,8 @@ public class ReputationHandler
             jsonHandler.write(values);
             }, 5, 5, TimeUnit.MINUTES);
     }
+
+    // <<<< REPUTATION >>>>
 
     private static void putRep(Reputation rep)
     {
@@ -128,5 +131,29 @@ public class ReputationHandler
         boolean success = rep.removeBan();
         putRep(rep);
         return success;
+    }
+
+    // <<<< DM_RATINGS >>>>
+
+    public static void addDMRating(long messageID, User user)
+    {
+        DM_RATINGS.put(messageID, user);
+    }
+
+    public static User getDMRatingUser(long messageID)
+    {
+        return DM_RATINGS.get(messageID);
+    }
+
+    public static void settleDMRating(long messageID, ReputationType type)
+    {
+        User user = getDMRatingUser(messageID);
+        if(user == null)
+        {
+            LOG.warn("User was null when trying to settle DM rating for message ID " + messageID);
+            return;
+        }
+        addRep(user, type);
+        DM_RATINGS.remove(messageID);
     }
 }
