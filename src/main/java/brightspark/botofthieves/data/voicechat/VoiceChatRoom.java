@@ -1,7 +1,9 @@
 package brightspark.botofthieves.data.voicechat;
 
+import brightspark.botofthieves.BotOfThieves;
 import brightspark.botofthieves.data.reputation.ReputationHandler;
 import brightspark.botofthieves.util.Utils;
+import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.User;
 
 import java.util.HashSet;
@@ -12,7 +14,17 @@ public class VoiceChatRoom
     private final String name;
     private final Set<User> users = new HashSet<>(4);
     private final short maxUsers;
+    private Long channelId;
 
+    public VoiceChatRoom(Guild guild, User initialUser, short maxUsers)
+    {
+        this(initialUser, maxUsers);
+        //Create voice channel
+        channelId = guild.getController().createVoiceChannel(name).complete().getIdLong();
+        BotOfThieves.LOG.info(String.format("Created voice channel %s (%s)", name, channelId));
+    }
+
+    //Only used in test command atm
     public VoiceChatRoom(User initialUser, short maxUsers)
     {
         name = initialUser.getName() + "'s Crew";
@@ -28,6 +40,11 @@ public class VoiceChatRoom
     public Set<User> getUsers()
     {
         return users;
+    }
+
+    public Long getChannelId()
+    {
+        return channelId;
     }
 
     public boolean addUser(User user)

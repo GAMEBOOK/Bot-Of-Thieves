@@ -12,9 +12,7 @@ import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.OnlineStatus;
-import net.dv8tion.jda.core.entities.Game;
-import net.dv8tion.jda.core.entities.Role;
-import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.entities.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,8 +31,10 @@ public class BotOfThieves
     public static JDA JDA;
     public static EventWaiter WAITER = new EventWaiter();
     public static String PREFIX;
-    public static Role ADMIN_ROLE;
     public static TextChannel LOG_CHANNEL;
+    public static Role ADMIN_ROLE;
+    public static Category VOICE_CHANNEL_CATEGORY;
+    public static VoiceChannel VOICE_CHANNEL_MAIN;
 
     static
     {
@@ -109,6 +109,26 @@ public class BotOfThieves
         }
         else
             LOG.warn("Bot admin role not set");
+
+        String vcCategory = Config.get("voice_channel_category");
+        if(!vcCategory.isEmpty())
+        {
+            VOICE_CHANNEL_CATEGORY = Utils.findCategory(vcCategory);
+            if(VOICE_CHANNEL_CATEGORY != null)
+                LOG.info(String.format("Set %s (%s) as the voice chat category", VOICE_CHANNEL_CATEGORY.getName(), VOICE_CHANNEL_CATEGORY.getIdLong()));
+        }
+        else
+            LOG.warn("Voice chat category not set");
+
+        String mainVcChannel = Config.get("voice_channel_main");
+        if(!mainVcChannel.isEmpty())
+        {
+            VOICE_CHANNEL_MAIN = Utils.findVoiceChannel(mainVcChannel);
+            if(VOICE_CHANNEL_MAIN != null)
+                LOG.info(String.format("Set %s (%s) as the main voice chat channel", VOICE_CHANNEL_MAIN.getName(), VOICE_CHANNEL_MAIN.getIdLong()));
+        }
+        else
+            LOG.warn("Main voice channel not set");
 
         LOG.info("Bot initialisation finished");
     }

@@ -1,8 +1,11 @@
 package brightspark.botofthieves.commands;
 
+import brightspark.botofthieves.data.voicechat.VoiceChatHandler;
 import brightspark.botofthieves.data.voicechat.VoiceChatRoom;
+import brightspark.botofthieves.util.Utils;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.entities.User;
 
 import java.util.HashSet;
@@ -42,6 +45,15 @@ public class CommandCrew extends CommandBase
             users.forEach(room::addUser);
             room.sendUserLeaveMessage(event.getAuthor());
             reply(event, String.format("Sent DM to %s for the users %s", event.getAuthor().getName(), users), true);
+        }
+        else if(arg0.equals("channeltest"))
+        {
+            VoiceChatRoom room = VoiceChatHandler.createRoom(event.getGuild(), event.getMember(), (short) 4);
+            MessageEmbed messageEmbed = Utils.createBotMessage(event.getGuild(), String.format("Created voice channel '%s' (%s)", room.getName(), room.getChannelId()),
+                    "Click the Green Heart reaction to join this crew");
+            //Send message and add reaction
+            //TODO: Track message ID to add members who react to the VC channel
+            event.getChannel().sendMessage(messageEmbed).queue(message -> message.addReaction(Utils.EMOJI_GREEN_HEART).queue());
         }
     }
 }

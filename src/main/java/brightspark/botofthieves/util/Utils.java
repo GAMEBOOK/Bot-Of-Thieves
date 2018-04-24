@@ -26,7 +26,7 @@ public class Utils
     }
 
     /**
-     * Finds a channel using an ID or name
+     * Finds a text channel using an ID or name
      */
     public static TextChannel findTextChannel(String channel)
     {
@@ -46,6 +46,30 @@ public class Utils
         return channelFound;
     }
 
+    /**
+     * Finds a voice channel using an ID or name
+     */
+    public static VoiceChannel findVoiceChannel(String channel)
+    {
+        VoiceChannel channelFound = null;
+        try
+        {
+            long channelId = Long.parseLong(channel);
+            channelFound = BotOfThieves.JDA.getVoiceChannelById(channelId);
+            if(channelFound == null) BotOfThieves.LOG.warn("Channel with ID " + channel + " not found");
+        }
+        catch(NumberFormatException e)
+        {
+            List<VoiceChannel> channels = BotOfThieves.JDA.getVoiceChannelByName(channel, false);
+            if(!channels.isEmpty()) channelFound = channels.get(0);
+            else BotOfThieves.LOG.warn("Channel '" + channel + "' not found");
+        }
+        return channelFound;
+    }
+
+    /**
+     * Finds a role using an ID or name
+     */
     public static Role findRole(String role)
     {
         Role roleFound = null;
@@ -62,6 +86,27 @@ public class Utils
             else BotOfThieves.LOG.warn("Role '" + role + "' not found");
         }
         return roleFound;
+    }
+
+    /**
+     * Finds a category using an ID or name
+     */
+    public static Category findCategory(String category)
+    {
+        Category categoryFound = null;
+        try
+        {
+            long categoryId = Long.parseLong(category);
+            categoryFound = BotOfThieves.JDA.getCategoryById(categoryId);
+            if(categoryFound == null) BotOfThieves.LOG.warn("Category with ID " + category + " not found");
+        }
+        catch(NumberFormatException e)
+        {
+            List<Category> categories = BotOfThieves.JDA.getCategoriesByName(category, false);
+            if(!categories.isEmpty()) categoryFound = categories.get(0);
+            else BotOfThieves.LOG.warn("Category '" + category + "' not found");
+        }
+        return categoryFound;
     }
 
     /**

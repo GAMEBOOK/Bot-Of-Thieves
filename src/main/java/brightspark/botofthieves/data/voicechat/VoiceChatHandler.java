@@ -1,7 +1,8 @@
 package brightspark.botofthieves.data.voicechat;
 
+import brightspark.botofthieves.BotOfThieves;
 import brightspark.botofthieves.Config;
-import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.entities.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,27 +12,57 @@ import java.util.Map;
 public class VoiceChatHandler
 {
     private static final Logger LOG = LoggerFactory.getLogger(VoiceChatHandler.class);
-    private static final String CHAT_CATEGORY = Config.get("voice_chat_category", "voice chat");
 
     private static Map<String, VoiceChatRoom> ROOMS = new HashMap<>();
 
-    public VoiceChatRoom getRoom(User user)
+    public static VoiceChatRoom getRoom(User user)
     {
         return ROOMS.get(user.getName());
     }
 
-    public VoiceChatRoom createRoom(User user, short maxUsers)
+    public static VoiceChatRoom createRoom(Guild guild, Member member, short maxUsers)
     {
-        VoiceChatRoom room = getRoom(user);
+        VoiceChatRoom room = getRoom(member.getUser());
         if(room != null)
         {
-            //Remove old room
-            //TODO: Kick users out of old room and give them the reputation DM
-            ROOMS.remove(user.getName());
-        }
-        //room = new VoiceChatRoom()
+            //Move users out of old room and give them the reputation DM
+            VoiceChatRoom finalRoom = room;
+            room.getUsers().forEach(u -> {
+                VoiceChannel channel = guild.getVoiceChannelById(finalRoom.getChannelId());
 
-        //TEMP
-        return null;
+                //Create the main VC and category if they don't exist
+                if(BotOfThieves.VOICE_CHANNEL_MAIN == null)
+                {
+                    if(BotOfThieves.VOICE_CHANNEL_CATEGORY == null)
+                    {
+                        String vcCategory = Config.get("voice_channel_category");
+                        if(!vcCategory.isEmpty())
+                            BotOfThieves.VOICE_CHANNEL_CATEGORY = (Category) guild.getController().createCategory(vcCategory).complete();
+                    }
+
+                    String vcMain = Config.get("voice_channel_main");
+                    if(!vcMain.isEmpty())
+                    {
+                        if(BotOfThieves.VOICE_CHANNEL_CATEGORY != null)
+                            BotOfThieves.VOICE_CHANNEL_CATEGORY.createVoiceChannel(vcMain).queue();
+                        else
+                            guild.getController().createVoiceChannel(vcMain).queue();
+                    }
+                }
+
+                //Move VC members
+                if(BotOfThieves.VOICE_CHANNEL_MAIN != null)
+                    guild.getController().moveVoiceMember(member, BotOfThieves.VOICE_CHANNEL_MAIN).queue();
+                else
+                    channel.delete().queue();
+                finalRoom.sendUserLeaveMessage(u);
+            });
+            ROOMS.remove(member.getUser().getName());
+        }
+
+        //Create new room
+        room = new VoiceChatRoom(guild, member.getUser(), maxUsers);
+        ROOMS.put(member.getUser().getName(), room);
+        return room;
     }
 }
