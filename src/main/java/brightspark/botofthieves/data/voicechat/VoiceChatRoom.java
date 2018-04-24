@@ -37,14 +37,18 @@ public class VoiceChatRoom
 
     public void sendUserLeaveMessage(User user)
     {
-        user.openPrivateChannel().queue(privateChannel -> users.forEach(u -> {
-            if(u.equals(user)) return;
-            //TODO: Add and actual message rather than just the user name
-            privateChannel.sendMessage(u.getName()).queue(message -> {
-                ReputationHandler.addDMRating(message.getIdLong(), u);
-                message.addReaction(Utils.EMOJI_GREEN_HEART).queue();
-                message.addReaction(Utils.EMOJI_NAME_BADGE).queue();
+        int[] i = new int[] {0};
+        user.openPrivateChannel().queue(privateChannel -> {
+            privateChannel.sendMessage("We hope you enjoyed your game! Please provide some feedback on the players from your last game by selecting the appropriate emote:").queue();
+            users.forEach(u -> {
+                if(u.equals(user)) return;
+                privateChannel.sendMessage(String.format("%s. %s", ++i[0], u.getName()))
+                        .queue(message -> {
+                            ReputationHandler.addDMRating(message.getIdLong(), u);
+                            message.addReaction(Utils.EMOJI_GREEN_HEART).queue();
+                            message.addReaction(Utils.EMOJI_NAME_BADGE).queue();
+                        });
             });
-        }));
+        });
     }
 }
