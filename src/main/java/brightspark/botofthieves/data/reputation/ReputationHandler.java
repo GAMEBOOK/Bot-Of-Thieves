@@ -1,5 +1,6 @@
 package brightspark.botofthieves.data.reputation;
 
+import brightspark.botofthieves.BotOfThieves;
 import brightspark.botofthieves.data.JsonHandler;
 import com.google.gson.reflect.TypeToken;
 import com.sun.istack.internal.NotNull;
@@ -8,18 +9,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class ReputationHandler
 {
     private static final Logger LOG = LoggerFactory.getLogger(ReputationHandler.class);
     private static final JsonHandler<Reputation> jsonHandler = new JsonHandler<>("reputation", new TypeToken<Collection<Reputation>>(){});
-    private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-    private static Map<Long, Reputation> REPUTATION = new HashMap<>();
-    private static Map<Long, User> DM_RATINGS = new HashMap<>();
+    private static final Map<Long, Reputation> REPUTATION = new HashMap<>();
+    private static final Map<Long, User> DM_RATINGS = new HashMap<>();
 
     static
     {
@@ -28,7 +26,7 @@ public class ReputationHandler
         LOG.info("Read " + REPUTATION.size() + " reputations from JSON file");
 
         //Setup a thread which saves the reputation to file every 5 mins
-        executor.scheduleAtFixedRate(() -> {
+        BotOfThieves.EXECUTOR.scheduleAtFixedRate(() -> {
             Collection<Reputation> values = new HashSet<>(REPUTATION.values());
             LOG.debug("Writing %s reputations to file", values.size());
             jsonHandler.write(values);

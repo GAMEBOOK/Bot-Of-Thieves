@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.net.MalformedURLException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class BotOfThieves
 {
@@ -27,7 +29,8 @@ public class BotOfThieves
     public static File LOG4J_PROP_FILE = new File(RESOURCES_DIR, "log4j.properties");
     public static File DATA_DIR = new File("data");
 
-    public static Logger LOG = LoggerFactory.getLogger(BotOfThieves.class);
+    public static final ScheduledExecutorService EXECUTOR = Executors.newSingleThreadScheduledExecutor();
+    public static final Logger LOG = LoggerFactory.getLogger(BotOfThieves.class);
     public static JDA JDA;
     public static EventWaiter WAITER = new EventWaiter();
     public static String PREFIX;

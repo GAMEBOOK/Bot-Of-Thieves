@@ -4,13 +4,9 @@ import brightspark.botofthieves.util.Utils;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.priv.react.PrivateMessageReactionAddEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ReputationListener extends ListenerAdapter
 {
-    private static final Logger LOG = LoggerFactory.getLogger(ReputationListener.class);
-
     @Override
     public void onPrivateMessageReactionAdd(PrivateMessageReactionAddEvent event)
     {
