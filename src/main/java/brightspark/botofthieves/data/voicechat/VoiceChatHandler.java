@@ -5,6 +5,8 @@ import brightspark.botofthieves.Config;
 import brightspark.botofthieves.util.Utils;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,6 +15,8 @@ import java.util.concurrent.TimeUnit;
 
 public class VoiceChatHandler
 {
+    private static final Logger LOG = LoggerFactory.getLogger(VoiceChatHandler.class);
+
     private static final int REQUEST_TIMEOUT;
 
     private static final Map<String, VoiceChatRoom> ROOMS = new HashMap<>();
@@ -50,6 +54,7 @@ public class VoiceChatHandler
                         if(channel != null)
                         {
                             User user = BotOfThieves.JDA.getUserById(request.getUserId());
+                            LOG.info(String.format("Timed out crew request from user %s (%s)", user.getName(), user.getIdLong()));
                             channel.sendMessage(Utils.createBotMessage(guild, user.getAsMention() + " your crew request has been too long without a response. You request has been cancelled - please request again if necessary.", true)).queue();
                         }
                         iter.remove();

@@ -48,11 +48,16 @@ public class CommandCrew extends CommandBase
         }
         else if(arg0.equals("channeltest"))
         {
+            if(!VoiceChatHandler.addRequest(event.getAuthor().getIdLong(), event.getChannel().getIdLong(), event.getGuild().getIdLong()))
+            {
+                reply(event, String.format("%s can't create crew request - you still have an active request", event.getAuthor().getAsMention()), true);
+                return;
+            }
+
             VoiceChatRoom room = VoiceChatHandler.createRoom(event.getGuild(), event.getMember(), (short) 4);
             MessageEmbed messageEmbed = Utils.createBotMessage(event.getGuild(), String.format("Created voice channel '%s' (%s)", room.getName(), room.getChannelId()),
                     "Click the Green Heart reaction to join this crew");
             //Send message and add reaction
-            //TODO: Track message ID to add members who react to the VC channel
             event.getChannel().sendMessage(messageEmbed).queue(message -> message.addReaction(Utils.EMOJI_GREEN_HEART).queue());
         }
     }
