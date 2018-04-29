@@ -2,7 +2,7 @@ package brightspark.botofthieves.data.voicechat;
 
 import brightspark.botofthieves.BotOfThieves;
 import brightspark.botofthieves.data.reputation.ReputationHandler;
-import brightspark.botofthieves.util.Utils;
+import brightspark.botofthieves.util.EmojiUtil;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
@@ -64,8 +64,8 @@ public class VoiceChatRoom
                 privateChannel.sendMessage(String.format("%s. %s", ++i[0], u.getName()))
                         .queue(message -> {
                             ReputationHandler.addDMRating(message.getIdLong(), u);
-                            message.addReaction(Utils.EMOJI_GREEN_HEART).queue();
-                            message.addReaction(Utils.EMOJI_NAME_BADGE).queue();
+                            message.addReaction(EmojiUtil.GREEN_HEART.toString()).queue();
+                            message.addReaction(EmojiUtil.NAME_BADGE.toString()).queue();
                         });
             });
         });

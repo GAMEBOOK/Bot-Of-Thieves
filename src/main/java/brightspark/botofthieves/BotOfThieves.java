@@ -1,11 +1,9 @@
 package brightspark.botofthieves;
 
-import brightspark.botofthieves.commands.CommandCrew;
-import brightspark.botofthieves.commands.CommandHello;
-import brightspark.botofthieves.commands.CommandReputation;
-import brightspark.botofthieves.commands.CommandStats;
+import brightspark.botofthieves.commands.*;
 import brightspark.botofthieves.data.reputation.ReputationListener;
 import brightspark.botofthieves.data.voicechat.VoiceChatListener;
+import brightspark.botofthieves.util.EmojiUtil;
 import brightspark.botofthieves.util.Utils;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
@@ -72,13 +70,14 @@ public class BotOfThieves
                             new CommandClientBuilder()
                             .setGame(Game.playing("Testing!"))
                             .setOwnerId(Config.get("owner_id"))
-                            .setEmojis(Utils.EMOJI_SAILBOAT, Utils.EMOJI_ANCHOR, Utils.EMOJI_SKULL_CROSSBONES)
+                            .setEmojis(EmojiUtil.BOAT.toString(), EmojiUtil.ANCHOR.toString(), EmojiUtil.CROSSBONES.toString())
                             .setPrefix(PREFIX)
                             .addCommands(
                                     new CommandHello(),
                                     new CommandReputation(),
                                     new CommandStats(),
-                                    new CommandCrew()
+                                    new CommandCrew(),
+                                    new CommandSave()
                             ).build(),
                             //new MainListener(),
                             new ReputationListener(),

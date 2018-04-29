@@ -3,6 +3,7 @@ package brightspark.botofthieves.commands;
 import brightspark.botofthieves.BotOfThieves;
 import brightspark.botofthieves.data.voicechat.VoiceChatHandler;
 import brightspark.botofthieves.data.voicechat.VoiceChatRoom;
+import brightspark.botofthieves.util.EmojiUtil;
 import brightspark.botofthieves.util.Utils;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.core.entities.*;
@@ -74,8 +75,8 @@ public class CommandCrew extends CommandBase
             //Send message and add reaction
             channel.sendMessage(messageEmbed).queue(message -> {
                 VoiceChatHandler.addRequest(message.getIdLong(), event.getAuthor().getIdLong(),
-                        channel.getIdLong(), guild.getIdLong());
-                message.addReaction(Utils.EMOJI_GREEN_HEART).queue();
+                        channel.getIdLong(), guild.getIdLong(), false);
+                message.addReaction(EmojiUtil.GREEN_HEART.toString()).queue();
             });
             //Move the sender into the voice channel
             VoiceChannel voiceChannel = guild.getVoiceChannelById(room.getChannelId());

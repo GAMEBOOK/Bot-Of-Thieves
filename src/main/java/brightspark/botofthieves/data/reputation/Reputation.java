@@ -1,5 +1,6 @@
 package brightspark.botofthieves.data.reputation;
 
+import brightspark.botofthieves.util.EmojiUtil;
 import brightspark.botofthieves.util.Utils;
 import com.sun.istack.internal.NotNull;
 import net.dv8tion.jda.core.entities.User;
@@ -167,7 +168,7 @@ public class Reputation
     {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("%s %s %s %s %s %s",
-                Utils.EMOJI_GREEN_HEART, good, Utils.EMOJI_NAME_BADGE, bad, Utils.EMOJI_ANCHOR, Math.round(getRatio() * 100)));
+                EmojiUtil.GREEN_HEART, good, EmojiUtil.NAME_BADGE, bad, EmojiUtil.ANCHOR, Math.round(getRatio() * 100)));
         Long ban = getBan();
         if(ban != null)
             sb.append("\n").append(String.format("Banned for %s", Utils.millisTimeToReadable(ban)));

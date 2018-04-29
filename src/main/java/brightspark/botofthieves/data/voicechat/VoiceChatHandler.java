@@ -123,9 +123,9 @@ public class VoiceChatHandler
      * Tries to add a new crew request.
      * Returns false if the user already has an active request.
      */
-    public static boolean addRequest(long messageId, long userId, long channelId, long guildId)
+    public static boolean addRequest(long messageId, long userId, long channelId, long guildId, boolean favouritesOnly)
     {
-        return REQUESTS.putIfAbsent(messageId, new VoiceChatRequest(messageId, userId, channelId, guildId)) == null;
+        return REQUESTS.putIfAbsent(messageId, new VoiceChatRequest(messageId, userId, channelId, guildId, favouritesOnly)) == null;
     }
 
     /**

@@ -38,16 +38,16 @@ public class ReputationHandler
 
     // <<<< REPUTATION >>>>
 
-    private static void putRep(Reputation rep)
-    {
-        REPUTATION.put(rep.getUserId(), rep);
-    }
-
     public static int forceSave()
     {
         Collection<Reputation> values = new HashSet<>(REPUTATION.values());
         if(values.size() > 0) jsonHandler.write(values);
         return values.size();
+    }
+
+    private static void putRep(Reputation rep)
+    {
+        REPUTATION.put(rep.getUserId(), rep);
     }
 
     public static Reputation getRep(User user)

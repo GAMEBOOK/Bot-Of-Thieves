@@ -1,5 +1,6 @@
 package brightspark.botofthieves.data.voicechat;
 
+import brightspark.botofthieves.util.EmojiUtil;
 import brightspark.botofthieves.util.Utils;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.guild.react.GuildMessageReactionAddEvent;
@@ -11,10 +12,29 @@ public class VoiceChatListener extends ListenerAdapter
     public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event)
     {
         User user = event.getUser();
-        if(user.isBot()) return;
+        String reactionName = event.getReactionEmote().getName();
+        if(user.isBot() || (!EmojiUtil.GREEN_HEART.equals(reactionName) && !EmojiUtil.STAR.equals(reactionName))) return;
         long messageId = event.getMessageIdLong();
         VoiceChatRequest request = VoiceChatHandler.getRequest(messageId);
         if(request == null) return;
+        if(request.isFavouritesOnly())
+        {
+            if(!EmojiUtil.STAR.equals(reactionName))
+                return;
+            else
+            {
+                //TODO: Check if is a favourite
+            }
+        }
+        else
+        {
+            if(!EmojiUtil.GREEN_HEART.equals(reactionName))
+                return;
+            else
+            {
+                //TODO: Check if is blacklisted
+            }
+        }
         VoiceChatRoom room = VoiceChatHandler.getRoom(request.getUserId());
         TextChannel channel = event.getChannel();
         Guild guild = event.getGuild();

@@ -14,12 +14,6 @@ import java.util.concurrent.TimeUnit;
 
 public class Utils
 {
-    public static final String EMOJI_GREEN_HEART = "\uD83D\uDC9A";
-    public static final String EMOJI_NAME_BADGE = "\uD83D\uDCDB";
-    public static final String EMOJI_ANCHOR = "\u2693";
-    public static final String EMOJI_SKULL_CROSSBONES = "\uD83D\uDC80";
-    public static final String EMOJI_SAILBOAT = "\u26F5";
-
     public static String getFullUser(User user)
     {
         return user.getName() + "#" + user.getDiscriminator();
@@ -152,6 +146,14 @@ public class Utils
     public static MessageEmbed createBotMessage(Guild guild, String title, String description)
     {
         return createEmbedMessage(getBotColour(guild), title, description);
+    }
+
+    /**
+     * Creates an EmbedBuilder already with the bot colour set
+     */
+    public static EmbedBuilder createBotMessageTemplate(Guild guild)
+    {
+        return new EmbedBuilder().setColor(getBotColour(guild));
     }
 
     /**
