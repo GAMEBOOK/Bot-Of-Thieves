@@ -19,7 +19,9 @@ public class VoiceChatHandler
 
     private static final int REQUEST_TIMEOUT;
 
-    private static final Map<String, VoiceChatRoom> ROOMS = new HashMap<>();
+    //Long is the userId
+    private static final Map<Long, VoiceChatRoom> ROOMS = new HashMap<>();
+    //Long is the messageId
     private static final Map<Long, VoiceChatRequest> REQUESTS = new HashMap<>();
 
     static
@@ -55,7 +57,7 @@ public class VoiceChatHandler
                         {
                             User user = BotOfThieves.JDA.getUserById(request.getUserId());
                             LOG.info(String.format("Timed out crew request from user %s (%s)", user.getName(), user.getIdLong()));
-                            channel.sendMessage(Utils.createBotMessage(guild, user.getAsMention() + " your crew request has been too long without a response. You request has been cancelled - please request again if necessary.", true)).queue();
+                            channel.sendMessage(Utils.createBotMessage(guild, user.getAsMention() + " your crew request has been too long without a response. You request has been cancelled - please request again if necessary.", false)).queue();
                         }
                         iter.remove();
                     }
@@ -66,71 +68,53 @@ public class VoiceChatHandler
 
     // <<<< ROOMS >>>>
 
-    public static VoiceChatRoom getRoom(User user)
+    public static VoiceChatRoom getRoom(long userId)
     {
-        return ROOMS.get(user.getName());
-    }
-
-    private static void initVoiceChannelPerms(Guild guild, Channel channel, Member member)
-    {
-        //Deny @everyone voice channel permissions from the voice channel
-        channel.getPermissionOverride(guild.getPublicRole()).getManager().deny(Permission.ALL_VOICE_PERMISSIONS).complete();
-        grantVoiceChannelMemberPerms(channel, member);
+        return ROOMS.get(userId);
     }
 
     public static void grantVoiceChannelMemberPerms(Channel channel, Member member)
     {
         //Allow the member voice channel permissions for the voice channel
-        channel.createPermissionOverride(member).complete()
-                .getManager().grant(Permission.ALL_VOICE_PERMISSIONS).complete();
+        PermissionOverride perms = channel.getPermissionOverride(member);
+        if(perms == null)
+            perms = channel.createPermissionOverride(member).complete();
+        perms.getManager().grant(Permission.ALL_VOICE_PERMISSIONS).complete();
     }
 
     public static VoiceChatRoom createRoom(Guild guild, Member member, short maxUsers)
     {
-        VoiceChatRoom room = getRoom(member.getUser());
+        VoiceChatRoom room = getRoom(member.getUser().getIdLong());
         if(room != null)
         {
             //Move users out of old room and give them the reputation DM
             VoiceChatRoom finalRoom = room;
             room.getUsers().forEach(u -> {
                 VoiceChannel channel = guild.getVoiceChannelById(finalRoom.getChannelId());
-
-                //Create the main VC and category if they don't exist
-                if(BotOfThieves.VOICE_CHANNEL_MAIN == null)
-                {
-                    if(BotOfThieves.VOICE_CHANNEL_CATEGORY == null)
-                    {
-                        String vcCategory = Config.get("voice_channel_category");
-                        if(!vcCategory.isEmpty())
-                            BotOfThieves.VOICE_CHANNEL_CATEGORY = (Category) guild.getController().createCategory(vcCategory).complete();
-                    }
-
-                    String vcMain = Config.get("voice_channel_main");
-                    if(!vcMain.isEmpty())
-                    {
-                        if(BotOfThieves.VOICE_CHANNEL_CATEGORY != null)
-                            BotOfThieves.VOICE_CHANNEL_CATEGORY.createVoiceChannel(vcMain).queue(c ->
-                                    initVoiceChannelPerms(guild, c, member));
-                        else
-                            guild.getController().createVoiceChannel(vcMain).queue(c ->
-                                    initVoiceChannelPerms(guild, c, member));
-                    }
-                }
-
-                //Move VC members
+                //Move VC members from old room
                 if(BotOfThieves.VOICE_CHANNEL_MAIN != null)
-                    guild.getController().moveVoiceMember(member, BotOfThieves.VOICE_CHANNEL_MAIN).queue();
+                    guild.getController().moveVoiceMember(member, BotOfThieves.VOICE_CHANNEL_MAIN).complete();
                 else
                     channel.delete().queue();
                 finalRoom.sendUserLeaveMessage(u);
             });
-            ROOMS.remove(member.getUser().getName());
+            ROOMS.remove(member.getUser().getIdLong());
         }
 
         //Create new room
-        room = new VoiceChatRoom(guild, member.getUser(), maxUsers);
-        ROOMS.put(member.getUser().getName(), room);
+        room = new VoiceChatRoom(guild, member, maxUsers);
+        ROOMS.put(member.getUser().getIdLong(), room);
         return room;
+    }
+
+    public static VoiceChannel createVoiceChannel(Guild guild, Member member)
+    {
+        BotOfThieves.setupVoiceChannels(guild);
+        String channelName = member.getEffectiveName() + "'s Crew";
+        Channel channel = BotOfThieves.VOICE_CHANNEL_CATEGORY.createVoiceChannel(channelName).complete();
+        BotOfThieves.initVoiceChannelPerms(guild, channel);
+        grantVoiceChannelMemberPerms(channel, member);
+        return (VoiceChannel) channel;
     }
 
     // <<<< REQUESTS >>>>
@@ -139,22 +123,27 @@ public class VoiceChatHandler
      * Tries to add a new crew request.
      * Returns false if the user already has an active request.
      */
-    public static boolean addRequest(long userId, long channelId, long guildId)
+    public static boolean addRequest(long messageId, long userId, long channelId, long guildId)
     {
-        return REQUESTS.putIfAbsent(userId, new VoiceChatRequest(userId, channelId, guildId)) == null;
+        return REQUESTS.putIfAbsent(messageId, new VoiceChatRequest(messageId, userId, channelId, guildId)) == null;
     }
 
     /**
      * Tries to remove the request for the user.
      * Returns false if there is no active request for the user.
      */
-    public static boolean removeRequest(long userId)
+    public static boolean removeRequest(long messageId)
     {
-        return REQUESTS.remove(userId) != null;
+        return REQUESTS.remove(messageId) != null;
     }
 
-    public static VoiceChatRequest getRequest(long userId)
+    public static VoiceChatRequest getRequest(long messageId)
     {
-        return REQUESTS.get(userId);
+        return REQUESTS.get(messageId);
+    }
+
+    public static boolean userHasRequest(long userId)
+    {
+        return REQUESTS.values().stream().anyMatch(request -> request.getUserId() == userId);
     }
 }

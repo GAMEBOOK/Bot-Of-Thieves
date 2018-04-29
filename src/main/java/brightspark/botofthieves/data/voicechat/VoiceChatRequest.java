@@ -2,14 +2,20 @@ package brightspark.botofthieves.data.voicechat;
 
 public class VoiceChatRequest
 {
-    private final long userId, channelId, guildId, startTime;
+    private final long messageId, userId, channelId, guildId, startTime;
 
-    public VoiceChatRequest(long userId, long channelId, long guildId)
+    public VoiceChatRequest(long messageId, long userId, long channelId, long guildId)
     {
+        this.messageId = messageId;
         this.userId = userId;
         this.channelId = channelId;
         this.guildId = guildId;
         startTime = System.currentTimeMillis();
+    }
+
+    public long getMessageId()
+    {
+        return messageId;
     }
 
     public long getUserId()

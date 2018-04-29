@@ -5,13 +5,11 @@ import brightspark.botofthieves.commands.CommandHello;
 import brightspark.botofthieves.commands.CommandReputation;
 import brightspark.botofthieves.commands.CommandStats;
 import brightspark.botofthieves.data.reputation.ReputationListener;
+import brightspark.botofthieves.data.voicechat.VoiceChatListener;
 import brightspark.botofthieves.util.Utils;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-import net.dv8tion.jda.core.AccountType;
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.JDABuilder;
-import net.dv8tion.jda.core.OnlineStatus;
+import net.dv8tion.jda.core.*;
 import net.dv8tion.jda.core.entities.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +80,9 @@ public class BotOfThieves
                                     new CommandStats(),
                                     new CommandCrew()
                             ).build(),
-                            new ReputationListener()
+                            //new MainListener(),
+                            new ReputationListener(),
+                            new VoiceChatListener()
                     ).buildBlocking();
         }
         catch(InterruptedException e)
@@ -113,26 +113,46 @@ public class BotOfThieves
         else
             LOG.warn("Bot admin role not set");
 
-        String vcCategory = Config.get("voice_channel_category");
-        if(!vcCategory.isEmpty())
-        {
-            VOICE_CHANNEL_CATEGORY = Utils.findCategory(vcCategory);
-            if(VOICE_CHANNEL_CATEGORY != null)
-                LOG.info(String.format("Set %s (%s) as the voice chat category", VOICE_CHANNEL_CATEGORY.getName(), VOICE_CHANNEL_CATEGORY.getIdLong()));
-        }
-        else
-            LOG.warn("Voice chat category not set");
-
-        String mainVcChannel = Config.get("voice_channel_main");
-        if(!mainVcChannel.isEmpty())
-        {
-            VOICE_CHANNEL_MAIN = Utils.findVoiceChannel(mainVcChannel);
-            if(VOICE_CHANNEL_MAIN != null)
-                LOG.info(String.format("Set %s (%s) as the main voice chat channel", VOICE_CHANNEL_MAIN.getName(), VOICE_CHANNEL_MAIN.getIdLong()));
-        }
-        else
-            LOG.warn("Main voice channel not set");
+        //JDA.getGuilds().forEach(BotOfThieves::setupVoiceChannels);
 
         LOG.info("Bot initialisation finished");
     }
+
+    public static void setupVoiceChannels(Guild guild)
+    {
+        //Create the main VC and category if they don't exist
+        String vcCategory = Config.get("voice_channel_category", "voice chats");
+        if((BotOfThieves.VOICE_CHANNEL_CATEGORY = Utils.findCategory(vcCategory)) == null)
+            BotOfThieves.VOICE_CHANNEL_CATEGORY = (Category) guild.getController().createCategory(vcCategory).complete();
+        LOG.info(String.format("Set %s (%s) as the voice chat category", VOICE_CHANNEL_CATEGORY.getName(), VOICE_CHANNEL_CATEGORY.getIdLong()));
+
+        String vcMain = Config.get("voice_channel_main", "main");
+        if((BotOfThieves.VOICE_CHANNEL_MAIN = Utils.findVoiceChannel(vcMain)) == null)
+            BotOfThieves.VOICE_CHANNEL_CATEGORY.createVoiceChannel(vcMain).queue(c -> {
+                BotOfThieves.VOICE_CHANNEL_MAIN = (VoiceChannel) c;
+                initVoiceChannelPerms(guild, c);
+            });
+        LOG.info(String.format("Set %s (%s) as the main voice chat channel", VOICE_CHANNEL_MAIN.getName(), VOICE_CHANNEL_MAIN.getIdLong()));
+    }
+
+    public static void initVoiceChannelPerms(Guild guild, Channel channel)
+    {
+        //Deny @everyone voice channel permissions from the voice channel
+        Role everyone = guild.getPublicRole();
+        PermissionOverride perms = channel.getPermissionOverride(everyone);
+        if(perms == null)
+            perms = channel.createPermissionOverride(everyone).complete();
+        perms.getManager().deny(Permission.ALL_VOICE_PERMISSIONS).complete();
+    }
+
+    /*
+    public static class MainListener extends ListenerAdapter
+    {
+        @Override
+        public void onGuildJoin(GuildJoinEvent event)
+        {
+            setupVoiceChannels(event.getGuild());
+        }
+    }
+    */
 }

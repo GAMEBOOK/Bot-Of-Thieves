@@ -4,7 +4,9 @@ import brightspark.botofthieves.BotOfThieves;
 import brightspark.botofthieves.data.reputation.ReputationHandler;
 import brightspark.botofthieves.util.Utils;
 import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.entities.VoiceChannel;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,20 +18,14 @@ public class VoiceChatRoom
     private final short maxUsers;
     private Long channelId;
 
-    public VoiceChatRoom(Guild guild, User initialUser, short maxUsers)
+    public VoiceChatRoom(Guild guild, Member initialMember, short maxUsers)
     {
-        this(initialUser, maxUsers);
-        //Create voice channel
-        channelId = guild.getController().createVoiceChannel(name).complete().getIdLong();
-        BotOfThieves.LOG.info(String.format("Created voice channel %s (%s)", name, channelId));
-    }
-
-    //Only used in test command atm
-    public VoiceChatRoom(User initialUser, short maxUsers)
-    {
-        name = initialUser.getName() + "'s Crew";
-        users.add(initialUser);
+        VoiceChannel channel = VoiceChatHandler.createVoiceChannel(guild, initialMember);
+        name = channel.getName();
+        channelId = channel.getIdLong();
+        users.add(initialMember.getUser());
         this.maxUsers = maxUsers;
+        BotOfThieves.LOG.info(String.format("Created voice channel %s (%s)", name, channelId));
     }
 
     public String getName()
@@ -47,9 +43,15 @@ public class VoiceChatRoom
         return channelId;
     }
 
+    public short getMaxUsers()
+    {
+        return maxUsers;
+    }
+
     public boolean addUser(User user)
     {
-        return users.size() < maxUsers && users.add(user);
+        users.add(user);
+        return users.size() <= maxUsers;
     }
 
     public void sendUserLeaveMessage(User user)
