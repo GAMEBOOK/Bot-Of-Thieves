@@ -37,6 +37,7 @@ public class CommandBlacklist extends CommandBase
             }
             return;
         }
+
         String otherName = Utils.joinStrings(args);
         User otherUser = Utils.findUser(otherName);
         if(otherUser == null)
@@ -46,7 +47,12 @@ public class CommandBlacklist extends CommandBase
         }
         long otherUserId = otherUser.getIdLong();
 
-        if(UserDataHandler.isBlacklisted(userId, otherUserId))
+        if(UserDataHandler.isFavourite(userId, otherUserId))
+        {
+            channel.sendMessage("User " + otherUser.getName() + " is already favourited!" +
+                    "\nRemove them from your favourites first to blacklist them.").queue();
+        }
+        else if(UserDataHandler.isBlacklisted(userId, otherUserId))
         {
             UserDataHandler.removeFromBlacklist(userId, otherUserId);
             channel.sendMessage("User " + otherUser.getName() + " removed from blacklist").queue();

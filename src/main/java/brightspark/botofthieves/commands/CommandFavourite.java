@@ -37,6 +37,7 @@ public class CommandFavourite extends CommandBase
             }
             return;
         }
+
         String otherName = Utils.joinStrings(args);
         User otherUser = Utils.findUser(otherName);
         if(otherUser == null)
@@ -46,7 +47,12 @@ public class CommandFavourite extends CommandBase
         }
         long otherUserId = otherUser.getIdLong();
 
-        if(UserDataHandler.isFavourite(userId, otherUserId))
+        if(UserDataHandler.isBlacklisted(userId, otherUserId))
+        {
+            channel.sendMessage("User " + otherUser.getName() + " is already blacklisted!" +
+                    "\nRemove them from your blacklist first to favourite them.").queue();
+        }
+        else if(UserDataHandler.isFavourite(userId, otherUserId))
         {
             UserDataHandler.removeFromFavourites(userId, otherUserId);
             channel.sendMessage("User " + otherUser.getName() + " removed from favourites").queue();
