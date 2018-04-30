@@ -23,9 +23,9 @@ public class CommandFavourite extends CommandBase
         MessageChannel channel = event.getChannel();
         if(args.length == 0)
         {
-            Set<Long> list = UserDataHandler.getFavourites(userId).getList();
+            Set<Long> list = UserDataHandler.getFavourites(userId);
             if(list.isEmpty())
-                channel.sendMessage("You have no favourites!").queue();
+                channel.sendMessage("You have no favourite users!").queue();
             else
             {
                 StringBuilder sb = new StringBuilder();
@@ -33,7 +33,7 @@ public class CommandFavourite extends CommandBase
                     User u = event.getJDA().getUserById(id);
                     if(u != null) sb.append(Utils.getFullUser(u)).append("\n");
                 });
-                channel.sendMessage("*Favourites:*\n" + sb.toString()).queue();
+                channel.sendMessage("*Favourite Users:*\n" + sb.toString()).queue();
             }
             return;
         }

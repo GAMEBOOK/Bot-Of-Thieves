@@ -6,10 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class UserDataHandler
@@ -57,20 +54,25 @@ public class UserDataHandler
         FAVOURITES.put(list.getUserId(), list);
     }
 
-    public static UserList getFavourites(long userId)
+    private static UserList getFavouritesInternal(long userId)
     {
         return FAVOURITES.getOrDefault(userId, new UserList(userId));
     }
 
+    public static Set<Long> getFavourites(long userId)
+    {
+        return getFavouritesInternal(userId).getList();
+    }
+
     public static boolean isFavourite(long userId, long otherUser)
     {
-        UserList list = getFavourites(userId);
+        UserList list = getFavouritesInternal(userId);
         return list.hasUser(otherUser);
     }
 
     public static boolean addToFavourites(long userId, long otherUser)
     {
-        UserList list = getFavourites(userId);
+        UserList list = getFavouritesInternal(userId);
         boolean success = list.addUser(otherUser);
         if(success) putFavourites(list);
         return success;
@@ -78,7 +80,7 @@ public class UserDataHandler
 
     public static boolean removeFromFavourites(long userId, long otherUser)
     {
-        UserList list = getFavourites(userId);
+        UserList list = getFavouritesInternal(userId);
         boolean success = list.removeUser(otherUser);
         if(success) putFavourites(list);
         return success;
@@ -98,20 +100,25 @@ public class UserDataHandler
         BLACKLISTS.put(list.getUserId(), list);
     }
 
-    private static UserList getBlacklist(long userId)
+    private static UserList getBlacklistInternal(long userId)
     {
         return BLACKLISTS.getOrDefault(userId, new UserList(userId));
     }
 
+    public static Set<Long> getBlacklist(long userId)
+    {
+        return getBlacklistInternal(userId).getList();
+    }
+
     public static boolean isBlacklisted(long userId, long otherUser)
     {
-        UserList list = getBlacklist(userId);
+        UserList list = getBlacklistInternal(userId);
         return list.hasUser(otherUser);
     }
 
     public static boolean addToBlacklist(long userId, long otherUser)
     {
-        UserList list = getBlacklist(userId);
+        UserList list = getBlacklistInternal(userId);
         boolean success = list.addUser(otherUser);
         if(success) putBlacklist(list);
         return success;
@@ -119,7 +126,7 @@ public class UserDataHandler
 
     public static boolean removeFromBlacklist(long userId, long otherUser)
     {
-        UserList list = getBlacklist(userId);
+        UserList list = getBlacklistInternal(userId);
         boolean success = list.removeUser(otherUser);
         if(success) putBlacklist(list);
         return success;

@@ -78,7 +78,8 @@ public class BotOfThieves
                                     new CommandStats(),
                                     new CommandCrew(),
                                     new CommandSave(),
-                                    new CommandFavourite()
+                                    new CommandFavourite(),
+                                    new CommandBlacklist()
                             ).build(),
                             //new MainListener(),
                             new ReputationListener(),
