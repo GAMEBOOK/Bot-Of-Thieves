@@ -4,6 +4,7 @@ import brightspark.botofthieves.data.userdata.UserDataHandler;
 import brightspark.botofthieves.util.EmojiUtil;
 import brightspark.botofthieves.util.Utils;
 import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.core.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.core.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
@@ -74,5 +75,22 @@ public class VoiceChatListener extends ListenerAdapter
             channel.sendMessage(Utils.createBotMessage(guild, user.getAsMention() + " this crew is already full! The request has been cancelled.", false)).queue();
             VoiceChatHandler.removeRequest(messageId);
         }
+    }
+
+    @Override
+    public void onGuildVoiceLeave(GuildVoiceLeaveEvent event)
+    {
+        VoiceChannel voiceChannel = event.getChannelLeft();
+        VoiceChatRoom room = VoiceChatHandler.getRoomByChannel(voiceChannel.getIdLong());
+        if(room == null) return;
+
+        User user = event.getMember().getUser();
+        room.sendUserLeaveMessage(user);
+        room.removeUser(user);
+
+        if(room.getUsers().size() == 0)
+            VoiceChatHandler.removeRoom(room.getUserId());
+        else
+            VoiceChatHandler.setRoom(room);
     }
 }

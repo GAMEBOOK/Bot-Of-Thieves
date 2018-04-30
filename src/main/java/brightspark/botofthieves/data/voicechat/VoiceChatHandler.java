@@ -73,6 +73,21 @@ public class VoiceChatHandler
         return ROOMS.get(userId);
     }
 
+    public static VoiceChatRoom getRoomByChannel(long channelId)
+    {
+        return ROOMS.values().stream().filter(room -> room.getChannelId().equals(channelId)).findFirst().orElse(null);
+    }
+
+    public static void setRoom(VoiceChatRoom room)
+    {
+        ROOMS.put(room.getUserId(), room);
+    }
+
+    public static void removeRoom(long userId)
+    {
+        ROOMS.remove(userId);
+    }
+
     public static void grantVoiceChannelMemberPerms(Channel channel, Member member)
     {
         //Allow the member voice channel permissions for the voice channel
