@@ -52,35 +52,35 @@ public class UserDataHandler
         return values.size();
     }
 
-    private void putFavourite(UserList list)
+    private static void putFavourites(UserList list)
     {
         FAVOURITES.put(list.getUserId(), list);
     }
 
-    private UserList getFavourites(long userId)
+    public static UserList getFavourites(long userId)
     {
         return FAVOURITES.getOrDefault(userId, new UserList(userId));
     }
 
-    public boolean isFavourite(long userId, long otherUser)
+    public static boolean isFavourite(long userId, long otherUser)
     {
         UserList list = getFavourites(userId);
         return list.hasUser(otherUser);
     }
 
-    public boolean addFavourite(long userId, long otherUser)
+    public static boolean addToFavourites(long userId, long otherUser)
     {
         UserList list = getFavourites(userId);
         boolean success = list.addUser(otherUser);
-        if(success) putFavourite(list);
+        if(success) putFavourites(list);
         return success;
     }
 
-    public boolean removeFavourite(long userId, long otherUser)
+    public static boolean removeFromFavourites(long userId, long otherUser)
     {
         UserList list = getFavourites(userId);
         boolean success = list.removeUser(otherUser);
-        if(success) putFavourite(list);
+        if(success) putFavourites(list);
         return success;
     }
 
@@ -91,5 +91,37 @@ public class UserDataHandler
         Collection<UserList> values = new HashSet<>(BLACKLISTS.values());
         if(values.size() > 0) jsonHandlerBlacklist.write(values);
         return values.size();
+    }
+
+    private static void putBlacklist(UserList list)
+    {
+        BLACKLISTS.put(list.getUserId(), list);
+    }
+
+    private static UserList getBlacklist(long userId)
+    {
+        return BLACKLISTS.getOrDefault(userId, new UserList(userId));
+    }
+
+    public static boolean isBlacklisted(long userId, long otherUser)
+    {
+        UserList list = getBlacklist(userId);
+        return list.hasUser(otherUser);
+    }
+
+    public static boolean addToBlacklist(long userId, long otherUser)
+    {
+        UserList list = getBlacklist(userId);
+        boolean success = list.addUser(otherUser);
+        if(success) putBlacklist(list);
+        return success;
+    }
+
+    public static boolean removeFromBlacklist(long userId, long otherUser)
+    {
+        UserList list = getBlacklist(userId);
+        boolean success = list.removeUser(otherUser);
+        if(success) putBlacklist(list);
+        return success;
     }
 }

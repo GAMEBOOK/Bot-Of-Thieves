@@ -1,5 +1,6 @@
 package brightspark.botofthieves.data.voicechat;
 
+import brightspark.botofthieves.data.userdata.UserDataHandler;
 import brightspark.botofthieves.util.EmojiUtil;
 import brightspark.botofthieves.util.Utils;
 import net.dv8tion.jda.core.entities.*;
@@ -17,32 +18,36 @@ public class VoiceChatListener extends ListenerAdapter
         long messageId = event.getMessageIdLong();
         VoiceChatRequest request = VoiceChatHandler.getRequest(messageId);
         if(request == null) return;
+        TextChannel channel = event.getChannel();
+        Guild guild = event.getGuild();
+        VoiceChatRoom room = VoiceChatHandler.getRoom(request.getUserId());
+
+        if(room == null)
+        {
+            channel.sendMessage(Utils.createBotMessage(guild, user.getAsMention() + " the crew voice chat does not exist! The request has been cancelled.", false)).queue();
+            VoiceChatHandler.removeRequest(messageId);
+            return;
+        }
+
         if(request.isFavouritesOnly())
         {
             if(!EmojiUtil.STAR.equals(reactionName))
                 return;
-            else
+            else if(!UserDataHandler.isFavourite(request.getUserId(), user.getIdLong()))
             {
-                //TODO: Check if is a favourite
+                channel.sendMessage(Utils.createBotMessage(guild, user.getAsMention() + " this crew is for favourites only!", false)).queue();
+                return;
             }
         }
         else
         {
             if(!EmojiUtil.GREEN_HEART.equals(reactionName))
                 return;
-            else
+            else if(!UserDataHandler.isBlacklisted(request.getUserId(), user.getIdLong()))
             {
-                //TODO: Check if is blacklisted
+                user.openPrivateChannel().queue(c -> c.sendMessage("You are blacklisted from " + room.getName()).queue());
+                return;
             }
-        }
-        VoiceChatRoom room = VoiceChatHandler.getRoom(request.getUserId());
-        TextChannel channel = event.getChannel();
-        Guild guild = event.getGuild();
-        if(room == null)
-        {
-            channel.sendMessage(Utils.createBotMessage(guild, user.getAsMention() + " the crew voice chat does not exist! The request has been cancelled.", false)).queue();
-            VoiceChatHandler.removeRequest(messageId);
-            return;
         }
 
         //Try add user to the crew

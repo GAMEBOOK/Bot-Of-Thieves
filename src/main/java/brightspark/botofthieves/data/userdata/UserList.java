@@ -32,4 +32,9 @@ public class UserList
     {
         return list.contains(userId);
     }
+
+    public Set<Long> getList()
+    {
+        return list;
+    }
 }

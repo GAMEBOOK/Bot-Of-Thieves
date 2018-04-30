@@ -104,6 +104,27 @@ public class Utils
     }
 
     /**
+     * Finds a user using an ID or name
+     */
+    public static User findUser(String user)
+    {
+        User userFound = null;
+        try
+        {
+            long userId = Long.parseLong(user);
+            userFound = BotOfThieves.JDA.getUserById(userId);
+            if(userFound == null) BotOfThieves.LOG.warn("User with ID " + user + " not found");
+        }
+        catch(NumberFormatException e)
+        {
+            List<User> users = BotOfThieves.JDA.getUsersByName(user, false);
+            if(!users.isEmpty()) userFound = users.get(0);
+            else BotOfThieves.LOG.warn("User '" + user + "' not found");
+        }
+        return userFound;
+    }
+
+    /**
      * Logs to the assigned log channel if it has been set
      */
     public static void logChannel(LogLevel level, User author, String text)
@@ -226,6 +247,11 @@ public class Utils
     public static String commaSeparate(long num)
     {
         return NumberFormat.getIntegerInstance().format(num);
+    }
+
+    public static String joinStrings(String[] array)
+    {
+        return joinStrings(array, 0);
     }
 
     public static String joinStrings(String[] array, int start)

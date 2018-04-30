@@ -5,6 +5,7 @@ import brightspark.botofthieves.util.LogLevel;
 import brightspark.botofthieves.util.Utils;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.entities.Role;
@@ -18,6 +19,7 @@ public abstract class CommandBase extends Command
 {
     protected final Logger LOG = LoggerFactory.getLogger(getClass());
     protected boolean removeSentMessage = false;
+    protected boolean dmOnly = false;
 
     public CommandBase(String name, String help, String... aliases)
     {
@@ -32,6 +34,8 @@ public abstract class CommandBase extends Command
         debug("Executing command '%s'", event.getMessage().getContentRaw());
         if(removeSentMessage)
             event.getMessage().delete().queue();
+        if(dmOnly && event.getChannelType() != ChannelType.PRIVATE)
+            return;
         doCommand(event, splitArgs(event.getArgs()));
     }
 
@@ -86,6 +90,12 @@ public abstract class CommandBase extends Command
             if(role.equals(BotOfThieves.ADMIN_ROLE))
                 return true;
         return false;
+    }
+
+    protected void setDmOnly()
+    {
+        guildOnly = false;
+        dmOnly = true;
     }
 
     protected void reply(CommandEvent event, String message, boolean bold)
