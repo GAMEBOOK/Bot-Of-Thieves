@@ -6,7 +6,6 @@ import brightspark.botofthieves.data.reputation.ReputationHandler;
 import brightspark.botofthieves.data.reputation.ReputationType;
 import brightspark.botofthieves.util.Utils;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
 
 import java.util.concurrent.TimeUnit;
@@ -41,10 +40,13 @@ public class CommandReputation extends CommandBase
             return;
         }
 
-        Member member = getMemberFromString(event, args[1]);
-        if(member == null) return;
+        User user = getUserFromString(event.getGuild(), args[1]);
+        if(user == null)
+        {
+            fail(event, "Couldn't find user '%s'", args[1]);
+            return;
+        }
 
-        User user = member.getUser();
         ReputationType repType;
         int amount = 1;
         Reputation reputation;

@@ -46,8 +46,8 @@ public class CommandCrew extends CommandBase
             Set<User> users = new HashSet<>();
             for(String arg : args)
             {
-                Member member = getMemberFromString(event, arg);
-                if(member != null) users.add(member.getUser());
+                User user = getUserFromString(guild, arg);
+                if(user != null) users.add(user);
             }
             if(users.size() == 0)
             {

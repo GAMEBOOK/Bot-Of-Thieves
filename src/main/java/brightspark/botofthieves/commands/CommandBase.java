@@ -5,10 +5,7 @@ import brightspark.botofthieves.util.LogLevel;
 import brightspark.botofthieves.util.Utils;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import net.dv8tion.jda.core.entities.ChannelType;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.MessageEmbed;
-import net.dv8tion.jda.core.entities.Role;
+import net.dv8tion.jda.core.entities.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,40 +44,64 @@ public abstract class CommandBase extends Command
     }
 
     /**
-     * Gets the member from the guild if they exist.
-     * @param memberString Can be either the member's display name or their @ mention.
+     * Gets the user from the guild if they exist.
+     * @param userString Can be either the user's display name or their @ mention.
      */
-    protected Member getMemberFromString(CommandEvent event, String memberString)
+    protected User getUserFromString(Guild guild, String userString)
     {
-        Member member = null;
+        if(guild == null) return getUserFromString(userString);
+
+        User user = null;
 
         //If the user is tagged, extract just the user ID
-        if(memberString.startsWith("<@"))
-            memberString = memberString.substring(2, memberString.length() - 1);
+        if(userString.startsWith("<@"))
+            userString = userString.substring(2, userString.length() - 1);
 
         try
         {
             //Try parse argument as a user ID
-            member = event.getGuild().getMemberById(memberString);
-            if(member == null) fail(event, "Couldn't find member '%s'", memberString);
+            Member member = guild.getMemberById(userString);
+            if(member != null) user = member.getUser();
         }
-        catch(NumberFormatException e)
+        catch(NumberFormatException ignored) {}
+
+        if(user == null)
         {
             //Try parse argument as a member name
-            List<Member> members = event.getGuild().getMembersByEffectiveName(memberString, true);
-            if(!members.isEmpty())
-            {
-                if(members.size() > 1)
-                {
-                    fail(event, "Found %s members with the name '%s'.\n" +
-                            "Please `@` mention the user with this command instead.", members.size(), memberString);
-                }
-                else
-                    member = members.get(0);
-            }
+            List<Member> members = guild.getMembersByEffectiveName(userString, true);
+            if(!members.isEmpty()) user = members.get(0).getUser();
         }
 
-        return member;
+        return user == null ? getUserFromString(userString) : user;
+    }
+
+    /**
+     * Gets the user if they exist.
+     * @param userString Can be either the user's display name or their @ mention.
+     */
+    protected User getUserFromString(String userString)
+    {
+        User user = null;
+
+        //If the user is tagged, extract just the user ID
+        if(userString.startsWith("<@"))
+            userString = userString.substring(2, userString.length() - 1);
+
+        try
+        {
+            //Try parse argument as a user ID
+            user = BotOfThieves.JDA.getUserById(userString);
+        }
+        catch(NumberFormatException ignored) {}
+
+        if(user == null)
+        {
+            //Try parse argument as a member name
+            List<User> users = BotOfThieves.JDA.getUsersByName(userString, true);
+            if(!users.isEmpty()) user = users.get(0);
+        }
+
+        return user;
     }
 
     protected boolean checkMemberPerms(Member member)
