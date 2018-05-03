@@ -16,6 +16,7 @@ public class CommandCrew extends CommandBase
     public CommandCrew()
     {
         super("crew", "");
+        setRemoveSentMessage();
     }
 
     @Override
@@ -26,10 +27,10 @@ public class CommandCrew extends CommandBase
             //Reply with crew details
             VoiceChatRoom room = VoiceChatHandler.getRoom(event.getAuthor().getIdLong());
             if(room == null)
-                reply(event, "You have no active room. Please use the 'crew' command to create a new room.", true);
+                replyError(event, "You have no active room. Please use the 'crew' command to create a new room.");
             else
-                reply(event, String.format("%s is looking for a %s person crew", event.getAuthor().getAsMention(), room.getMaxUsers()),
-                        "Click the Green Heart reaction to join this crew");
+                reply(event, null, String.format("%s is looking for a %s person crew\nClick the Green Heart reaction to join this crew",
+                        event.getAuthor().getAsMention(), room.getMaxUsers()), false);
             return;
         }
         String arg0 = args[0].toLowerCase();
@@ -39,7 +40,7 @@ public class CommandCrew extends CommandBase
         {
             if(args.length == 1)
             {
-                reply(event, "Provide at least 1 user as an argument", true);
+                replyError(event, "Provide at least 1 user as an argument");
                 return;
             }
             //Send user the reputation DM
@@ -51,19 +52,19 @@ public class CommandCrew extends CommandBase
             }
             if(users.size() == 0)
             {
-                reply(event, "Couldn't parse any arguments to users", true);
+                replyError(event, "Couldn't parse any arguments as users");
                 return;
             }
             VoiceChatRoom room = new VoiceChatRoom(guild, sender, Short.MAX_VALUE);
             users.forEach(room::addUser);
             room.sendUserLeaveMessage(event.getAuthor());
-            reply(event, String.format("Sent DM to %s for the users %s", event.getAuthor().getName(), users), true);
+            replySuccess(event, String.format("Sent DM to %s for the users %s", event.getAuthor().getName(), users));
         }
         else if(arg0.equals("channeltest"))
         {
             if(VoiceChatHandler.userHasRequest(event.getAuthor().getIdLong()))
             {
-                reply(event, String.format("%s can't create crew request - you still have an active request", event.getAuthor().getAsMention()), false);
+                replyWarning(event, String.format("%s can't create crew request - you still have an active request", event.getAuthor().getAsMention()));
                 return;
             }
 
@@ -73,7 +74,7 @@ public class CommandCrew extends CommandBase
             MessageEmbed messageEmbed = Utils.createBotMessage(guild, String.format("Created %s", room.getName()),
                     "Click the Green Heart reaction to join this crew");
             //Send message and add reaction
-            channel.sendMessage(messageEmbed).queue(message -> {
+            replyWithConsumer(event, messageEmbed, message -> {
                 VoiceChatHandler.addRequest(message.getIdLong(), event.getAuthor().getIdLong(),
                         channel.getIdLong(), guild.getIdLong(), false);
                 message.addReaction(EmojiUtil.GREEN_HEART.toString()).queue();
@@ -86,7 +87,7 @@ public class CommandCrew extends CommandBase
                     //Move the member to the voice channel
                     guild.getController().moveVoiceMember(sender, voiceChannel).queue(success -> LOG.info("Moved " + sender.getEffectiveName() + " to voice channel"));
                 else
-                    channel.sendMessage(Utils.createBotMessage(guild, sender.getAsMention() + " you are not already in a voice channel. Please manually join the voice channel " + room.getName(), false)).queue();
+                    replyWarning(event, String.format("%s you are not already in a voice channel. Please manually join the voice channel %s", sender.getAsMention(), room.getName()));
             }
         }
         else if(arg0.equals("cleanup"))
@@ -99,7 +100,7 @@ public class CommandCrew extends CommandBase
                         channel.delete().queue();
                         count[0]++;
                     });
-            reply(event, String.format("Removed %s empty voice channels", count[0]), true);
+            replySuccess(event, String.format("Removed %s empty voice channels", count[0]));
         }
     }
 }

@@ -2,8 +2,9 @@ package brightspark.botofthieves.data.reputation;
 
 import brightspark.botofthieves.util.EmojiUtil;
 import brightspark.botofthieves.util.Utils;
-import com.sun.istack.internal.NotNull;
 import net.dv8tion.jda.core.entities.User;
+
+import javax.annotation.Nonnull;
 
 public class Reputation
 {
@@ -11,7 +12,7 @@ public class Reputation
     private int good, bad;
     private Long banEnd;
 
-    public Reputation(@NotNull User user)
+    public Reputation(@Nonnull User user)
     {
         userId = user.getIdLong();
     }
@@ -51,7 +52,7 @@ public class Reputation
     /**
      * Gets the amount of reputation of the type specified
      */
-    public int getType(@NotNull ReputationType type)
+    public int getType(@Nonnull ReputationType type)
     {
         switch(type)
         {
@@ -73,7 +74,7 @@ public class Reputation
      * Increase the given type of reputation by 1 if not banned
      * Returns false if the user is banned and therefore no change is made
      */
-    public boolean increase(@NotNull ReputationType type)
+    public boolean increase(@Nonnull ReputationType type)
     {
         return increase(type, 1);
     }
@@ -82,7 +83,7 @@ public class Reputation
      * Increase the given type of reputation if not banned
      * Returns false if the user is banned and therefore no change is made
      */
-    public boolean increase(@NotNull ReputationType type, int amount)
+    public boolean increase(@Nonnull ReputationType type, int amount)
     {
         if(type.isGood())
         {
@@ -97,7 +98,7 @@ public class Reputation
     /**
      * Decreases the given type of reputation by 1
      */
-    public void decrease(@NotNull ReputationType type)
+    public void decrease(@Nonnull ReputationType type)
     {
         decrease(type, 1);
     }
@@ -105,7 +106,7 @@ public class Reputation
     /**
      * Decreases the given type of reputation
      */
-    public void decrease(@NotNull ReputationType type, int amount)
+    public void decrease(@Nonnull ReputationType type, int amount)
     {
         if(type.isGood())
             good = Math.max(0, good - amount);

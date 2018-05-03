@@ -115,8 +115,16 @@ public class Utils
             userFound = BotOfThieves.JDA.getUserById(userId);
             if(userFound == null) BotOfThieves.LOG.warn("User with ID " + user + " not found");
         }
-        catch(NumberFormatException e)
+        catch(NumberFormatException ignored) {}
+
+        if(userFound == null)
         {
+            if(user.matches(".*#\\d{4}$"))
+            {
+                //Try parse as <user>#<discriminator>
+                String[] split = user.split("#");
+                if(split.length == 2) user = split[0];
+            }
             List<User> users = BotOfThieves.JDA.getUsersByName(user, false);
             if(!users.isEmpty()) userFound = users.get(0);
             else BotOfThieves.LOG.warn("User '" + user + "' not found");

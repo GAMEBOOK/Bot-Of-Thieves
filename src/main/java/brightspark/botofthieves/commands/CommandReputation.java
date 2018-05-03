@@ -22,28 +22,22 @@ public class CommandReputation extends CommandBase
     {
         String arg0 = args[0].toLowerCase();
 
-        if(arg0.equals("forcesave"))
+        if(args.length < 2)
         {
-            int numSaved = ReputationHandler.forceSave();
-            reply(event, String.format("Saved %s reputations to file", numSaved), true);
-            return;
-        }
-        else if(args.length < 2)
-        {
-            fail(event, "Insufficient arguments");
+            replyError(event, "Insufficient arguments");
             return;
         }
 
         if(!checkMemberPerms(event.getMember()))
         {
-            fail(event, "You do not have permission to use this command!");
+            replyError(event, "You do not have permission to use this command!");
             return;
         }
 
         User user = getUserFromString(event.getGuild(), args[1]);
         if(user == null)
         {
-            fail(event, "Couldn't find user '%s'", args[1]);
+            replyError(event, String.format("Couldn't find user '%s'", args[1]));
             return;
         }
 
@@ -56,7 +50,7 @@ public class CommandReputation extends CommandBase
             case "add": //add [user] [type] [amount]
                 if(args.length < 3 || (repType = ReputationType.fromString(args[2])) == null)
                 {
-                    fail(event, "Missing whether to change good or bad reputation!");
+                    replyError(event, "Missing whether to change good or bad reputation!");
                     return;
                 }
                 if(args.length >= 4)
@@ -67,26 +61,26 @@ public class CommandReputation extends CommandBase
                     }
                     catch(NumberFormatException e)
                     {
-                        fail(event, "%s is not a number!", args[3]);
+                        replyError(event, String.format("%s is not a number!", args[3]));
                         return;
                     }
                 }
 
                 ReputationChangeResult result = ReputationHandler.addRep(user, repType, amount);
                 if(result.successful())
-                    reply(event, String.format("Added %s to %s's %s reputation\nThey now have %s %s reputation",
+                    replySuccess(event, "", String.format("Added %s to %s's %s reputation\nThey now have %s %s reputation",
                             Utils.commaSeparate(amount), user.getName(), repType,
-                            Utils.commaSeparate(result.getReputation().getType(repType)), repType), false);
+                            Utils.commaSeparate(result.getReputation().getType(repType)), repType));
                 else
                 {
-                    reply(event, String.format("Can't add good reputation to %s - they're banned for %s",
-                            user.getName(), Utils.millisTimeToReadable(ReputationHandler.getRep(user).getBan())), true);
+                    replyWarning(event, String.format("Can't add good reputation to %s - they're banned for %s",
+                            user.getName(), Utils.millisTimeToReadable(ReputationHandler.getRep(user).getBan())));
                 }
                 break;
             case "remove": //remove [user] [type] [amount]
                 if(args.length < 3 || (repType = ReputationType.fromString(args[2])) == null)
                 {
-                    fail(event, "Missing whether to change good or bad reputation!");
+                    replyError(event, "Missing whether to change good or bad reputation!");
                     return;
                 }
                 if(args.length >= 4)
@@ -97,20 +91,20 @@ public class CommandReputation extends CommandBase
                     }
                     catch(NumberFormatException e)
                     {
-                        fail(event, "%s is not a number!", args[3]);
+                        replyError(event, String.format("%s is not a number!", args[3]));
                         return;
                     }
                 }
 
                 reputation = ReputationHandler.subRep(user, repType, amount);
-                reply(event, String.format("Deducted %s from %s's %s reputation\nThey now have %s %s reputation",
+                replySuccess(event, "", String.format("Deducted %s from %s's %s reputation\nThey now have %s %s reputation",
                         Utils.commaSeparate(amount), user.getName(), repType,
-                        Utils.commaSeparate(reputation.getType(repType)), repType), false);
+                        Utils.commaSeparate(reputation.getType(repType)), repType));
                 break;
             case "reset": //reset [user]
                 ReputationHandler.setRep(user, ReputationType.GOOD, 0);
                 ReputationHandler.setRep(user, ReputationType.BAD, 0);
-                reply(event, String.format("Reset %s's reputation", user.getName()), false);
+                replySuccess(event, String.format("Reset %s's reputation", user.getName()));
                 break;
             case "ban": //ban [user] [time]
                 long millis = TimeUnit.MINUTES.toMillis(30);
@@ -118,29 +112,29 @@ public class CommandReputation extends CommandBase
                     millis = Utils.extractMillisFromTimes(Utils.joinStrings(args, 2));
                 if(millis < 0)
                 {
-                    fail(event, "Couldn't parse ban time - make sure it's separate values ending in either d, h, m, or s (days, hours, minutes, or seconds respectively)");
+                    replyError(event, "Couldn't parse ban time - make sure it's separate values ending in either d, h, m, or s (days, hours, minutes, or seconds respectively)");
                     return;
                 }
 
                 if(ReputationHandler.ban(user, millis))
                 {
-                    reply(event, String.format("Banned %s for %s", user.getName(), Utils.millisTimeToReadable(millis)), true);
+                    replySuccess(event, String.format("Banned %s for %s", user.getName(), Utils.millisTimeToReadable(millis)));
                 }
                 else
                 {
                     long currentBan = ReputationHandler.getRep(user).getBan();
                     String banTime = Utils.millisTimeToReadable(currentBan);
-                    reply(event, String.format("Couldn't ban %s as they're already banned for %s", user.getName(), banTime), true);
+                    replyWarning(event, String.format("Couldn't ban %s as they're already banned for %s", user.getName(), banTime));
                 }
                 break;
             case "removeban":
                 if(ReputationHandler.removeBan(user))
-                    reply(event, String.format("Removed ban from %s", user.getName()), true);
+                    replySuccess(event, String.format("Removed ban from %s", user.getName()));
                 else
-                    reply(event, String.format("Couldn't remove non-existant ban from %s", user.getName()), true);
+                    replyWarning(event, String.format("Couldn't remove non-existant ban from %s", user.getName()));
                 break;
             default:
-                fail(event, "%s is not a valid argument!", args[0]);
+                replyError(event, String.format("%s is not a valid argument!", args[0]));
         }
     }
 }

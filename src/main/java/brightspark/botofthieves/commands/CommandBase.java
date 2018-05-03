@@ -11,12 +11,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.Consumer;
 
 public abstract class CommandBase extends Command
 {
     protected final Logger LOG = LoggerFactory.getLogger(getClass());
-    protected boolean removeSentMessage = false;
-    protected boolean dmOnly = false;
+    private boolean removeSentMessage = false;
+    private boolean dmOnly = false;
 
     public CommandBase(String name, String help, String... aliases)
     {
@@ -28,11 +29,11 @@ public abstract class CommandBase extends Command
     @Override
     protected void execute(CommandEvent event)
     {
-        debug("Executing command '%s'", event.getMessage().getContentRaw());
         if(removeSentMessage)
             event.getMessage().delete().queue();
         if(dmOnly && event.getChannelType() != ChannelType.PRIVATE)
             return;
+        info("%s executed command '%s'", Utils.getFullUser(event.getAuthor()), event.getMessage().getContentDisplay());
         doCommand(event, splitArgs(event.getArgs()));
     }
 
@@ -113,49 +114,96 @@ public abstract class CommandBase extends Command
         return false;
     }
 
+    protected void setRemoveSentMessage()
+    {
+        removeSentMessage = true;
+    }
+
     protected void setDmOnly()
     {
         guildOnly = false;
         dmOnly = true;
     }
 
+    /*
+    protected void reply(CommandEvent event, String message)
+    {
+        reply(event, message, null, true);
+    }
+
     protected void reply(CommandEvent event, String message, boolean bold)
     {
-        event.getChannel().sendMessage(Utils.createBotMessage(event.getGuild(), message, bold)).queue();
+        reply(event, null, message, bold);
     }
 
-    protected void reply(CommandEvent event, String title, String description)
+    protected void reply(CommandEvent event, String title, String desc)
     {
-        event.getChannel().sendMessage(Utils.createBotMessage(event.getGuild(), title, description)).queue();
+        reply(event, title, desc, true);
+    }
+    */
+
+    protected void replySuccess(CommandEvent event, String message)
+    {
+        reply(event, null, String.format("%s %s", event.getClient().getSuccess(), message), true);
     }
 
-    protected void reply(CommandEvent event, MessageEmbed message)
+    protected void replySuccess(CommandEvent event, String title, String desc)
     {
-        event.getChannel().sendMessage(message).queue();
+        reply(event, String.format("%s %s", event.getClient().getSuccess(), title), desc, false);
     }
 
-    private void fail(CommandEvent event)
+    protected void replyWarning(CommandEvent event, String message)
     {
+        reply(event, null, String.format("%s %s", event.getClient().getWarning(), message), true);
+    }
+
+    protected void replyWarning(CommandEvent event, String title, String desc)
+    {
+        reply(event, String.format("%s %s", event.getClient().getWarning(), title), desc, false);
+    }
+
+    protected void replyError(CommandEvent event, String message)
+    {
+        reply(event, null, String.format("%s %s", event.getClient().getError(), message), true);
+        warn("Command '%s' execution failed: %s", event.getMessage().getContentDisplay(), message);
         if(event.getClient().getListener() != null)
             event.getClient().getListener().onTerminatedCommand(event, this);
     }
 
-    /**
-     * Call this method when a command fails at any point
-     */
-    protected void fail(CommandEvent event, @Nullable String message, Object... args)
+    public void reply(CommandEvent event, @Nullable String title, String desc, boolean bold)
     {
-        if(message != null) reply(event, String.format(message, args), true);
-        fail(event);
+        MessageChannel channel = event.getChannel();
+        debug("Sending message to %s channel %s -> Title: %s # Desc: %s",
+                channel.getType(), channel.getName(), title, desc);
+        switch(channel.getType())
+        {
+            case PRIVATE:
+            case GROUP:
+                event.reply(title == null ? desc : String.format("**%s**\n%s", title, desc));
+                return;
+            case TEXT:
+                if(title == null)
+                    event.reply(Utils.createBotMessage(event.getGuild(), desc, bold));
+                else
+                    event.reply(Utils.createBotMessage(event.getGuild(), title, desc));
+                return;
+            default:
+                error("Can't send message to a %s channel! Doing nothing", channel.getType());
+        }
     }
 
-    /**
-     * Call this method when a command fails at any point
-     */
-    protected void fail(CommandEvent event, MessageEmbed message)
+    protected void reply(CommandEvent event, MessageEmbed message)
     {
-        if(message != null) reply(event, message);
-        fail(event);
+        debug("Sending message to %s channel %s -> Title: %s # Desc: %s",
+                event.getChannel().getType(), event.getChannel().getName(), message.getTitle(), message.getDescription());
+        event.reply(message);
+    }
+
+    protected void replyWithConsumer(CommandEvent event, MessageEmbed message, Consumer<Message> onSuccess)
+    {
+        debug("Sending message to %s channel %s -> Title: %s # Desc: %s",
+                event.getChannel().getType(), event.getChannel().getName(), message.getTitle(), message.getDescription());
+        event.reply(message, onSuccess);
     }
 
     protected void info(String message, Object... args)
@@ -183,6 +231,13 @@ public abstract class CommandBase extends Command
     {
         String m = String.format(message, args);
         LOG.error(m);
+        Utils.logChannel(LogLevel.ERROR, m);
+    }
+
+    protected void error(Throwable throwable, String message, Object... args)
+    {
+        String m = String.format(message, args);
+        LOG.error(m, throwable);
         Utils.logChannel(LogLevel.ERROR, m);
     }
 }

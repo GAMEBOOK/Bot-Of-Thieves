@@ -21,10 +21,10 @@ public class CommandStats extends CommandBase
             user = getUserFromString(event.getGuild(), args[0]);
             if(user == null)
             {
-                fail(event, "Couldn't find user '%s'", args[0]);
+                replyError(event, String.format("Couldn't find user '%s'", args[0]));
                 return;
             }
         }
-        reply(event, String.format("%s's reputation stats:", user.getName()), ReputationHandler.getRep(user).getText());
+        reply(event, String.format("%s's reputation stats:", user.getName()), ReputationHandler.getRep(user).getText(), false);
     }
 }

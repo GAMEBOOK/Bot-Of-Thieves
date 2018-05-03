@@ -3,11 +3,11 @@ package brightspark.botofthieves.data.reputation;
 import brightspark.botofthieves.BotOfThieves;
 import brightspark.botofthieves.data.JsonHandler;
 import com.google.gson.reflect.TypeToken;
-import com.sun.istack.internal.NotNull;
 import net.dv8tion.jda.core.entities.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,7 +58,7 @@ public class ReputationHandler
     /**
      * Tries to add 1 reputation for the user and returns the result
      */
-    public static ReputationChangeResult addRep(User user, @NotNull ReputationType type)
+    public static ReputationChangeResult addRep(User user, @Nonnull ReputationType type)
     {
         return addRep(user, type, 1);
     }
@@ -66,7 +66,7 @@ public class ReputationHandler
     /**
      * Tries to add 1 reputation for the user and returns the result
      */
-    public static ReputationChangeResult addRep(User user, @NotNull ReputationType type, int amount)
+    public static ReputationChangeResult addRep(User user, @Nonnull ReputationType type, int amount)
     {
         Reputation rep = getRep(user);
         boolean success = rep.increase(type, amount);
@@ -77,7 +77,7 @@ public class ReputationHandler
     /**
      * Deducts 1 reputation from the user and returns the reputation
      */
-    public static Reputation subRep(User user, @NotNull ReputationType type)
+    public static Reputation subRep(User user, @Nonnull ReputationType type)
     {
         return subRep(user, type, 1);
     }
@@ -85,7 +85,7 @@ public class ReputationHandler
     /**
      * Deducts 1 reputation from the user and returns the reputation
      */
-    public static Reputation subRep(User user, @NotNull ReputationType type, int amount)
+    public static Reputation subRep(User user, @Nonnull ReputationType type, int amount)
     {
         Reputation rep = getRep(user);
         rep.decrease(type, amount);
@@ -96,7 +96,7 @@ public class ReputationHandler
     /**
      * Sets the reputation for the user and returns the reputation after the change
      */
-    public static Reputation setRep(User user, @NotNull ReputationType type, int amount)
+    public static Reputation setRep(User user, @Nonnull ReputationType type, int amount)
     {
         Reputation rep = getRep(user);
         if(type.isGood())
