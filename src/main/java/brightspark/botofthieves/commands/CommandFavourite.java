@@ -31,7 +31,7 @@ public class CommandFavourite extends CommandBase
                     User u = event.getJDA().getUserById(id);
                     if(u != null) sb.append(Utils.getFullUser(u)).append("\n");
                 });
-                reply(event, "Favourite Users:", sb.toString(), false);
+                reply(event, "Favourite Users:", sb.toString());
             }
             return;
         }

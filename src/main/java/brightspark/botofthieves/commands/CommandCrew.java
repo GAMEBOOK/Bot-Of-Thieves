@@ -30,7 +30,7 @@ public class CommandCrew extends CommandBase
                 replyError(event, "You have no active room. Please use the 'crew' command to create a new room.");
             else
                 reply(event, null, String.format("%s is looking for a %s person crew\nClick the Green Heart reaction to join this crew",
-                        event.getAuthor().getAsMention(), room.getMaxUsers()), false);
+                        event.getAuthor().getAsMention(), room.getMaxUsers()));
             return;
         }
         String arg0 = args[0].toLowerCase();

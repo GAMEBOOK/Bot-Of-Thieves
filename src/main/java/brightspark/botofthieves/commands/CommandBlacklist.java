@@ -31,7 +31,7 @@ public class CommandBlacklist extends CommandBase
                     User u = event.getJDA().getUserById(id);
                     if(u != null) sb.append(Utils.getFullUser(u)).append("\n");
                 });
-                reply(event, "Blacklisted Users:", sb.toString(), false);
+                reply(event, "Blacklisted Users:", sb.toString());
             }
             return;
         }

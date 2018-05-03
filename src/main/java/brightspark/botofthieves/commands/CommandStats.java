@@ -25,6 +25,6 @@ public class CommandStats extends CommandBase
                 return;
             }
         }
-        reply(event, String.format("%s's reputation stats:", user.getName()), ReputationHandler.getRep(user).getText(), false);
+        reply(event, String.format("%s's reputation stats:", user.getName()), ReputationHandler.getRep(user).getText());
     }
 }

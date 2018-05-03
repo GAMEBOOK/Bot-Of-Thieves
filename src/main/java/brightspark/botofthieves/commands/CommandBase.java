@@ -125,52 +125,35 @@ public abstract class CommandBase extends Command
         dmOnly = true;
     }
 
-    /*
-    protected void reply(CommandEvent event, String message)
-    {
-        reply(event, message, null, true);
-    }
-
-    protected void reply(CommandEvent event, String message, boolean bold)
-    {
-        reply(event, null, message, bold);
-    }
-
-    protected void reply(CommandEvent event, String title, String desc)
-    {
-        reply(event, title, desc, true);
-    }
-    */
-
     protected void replySuccess(CommandEvent event, String message)
     {
-        reply(event, null, String.format("%s %s", event.getClient().getSuccess(), message), true);
+        reply(event, null, String.format("%s %s", event.getClient().getSuccess(), message));
     }
 
     protected void replySuccess(CommandEvent event, String title, String desc)
     {
-        reply(event, String.format("%s %s", event.getClient().getSuccess(), title), desc, false);
+        reply(event, String.format("%s %s", event.getClient().getSuccess(), title), desc);
     }
 
     protected void replyWarning(CommandEvent event, String message)
     {
-        reply(event, null, String.format("%s %s", event.getClient().getWarning(), message), true);
+        reply(event, null, String.format("%s %s", event.getClient().getWarning(), message));
     }
 
     protected void replyWarning(CommandEvent event, String title, String desc)
     {
-        reply(event, String.format("%s %s", event.getClient().getWarning(), title), desc, false);
+        reply(event, String.format("%s %s", event.getClient().getWarning(), title), desc);
     }
 
     protected void replyError(CommandEvent event, String message)
     {
-        reply(event, null, String.format("%s %s", event.getClient().getError(), message), true);
+        reply(event, null, String.format("%s %s", event.getClient().getError(), message));
         warn("Command '%s' execution failed: %s", event.getMessage().getContentDisplay(), message);
         if(event.getClient().getListener() != null)
             event.getClient().getListener().onTerminatedCommand(event, this);
     }
 
-    public void reply(CommandEvent event, @Nullable String title, String desc, boolean bold)
+    public void reply(CommandEvent event, @Nullable String title, String desc)
     {
         MessageChannel channel = event.getChannel();
         debug("Sending message to %s channel %s -> Title: %s # Desc: %s",
@@ -183,7 +166,7 @@ public abstract class CommandBase extends Command
                 return;
             case TEXT:
                 if(title == null)
-                    event.reply(Utils.createBotMessage(event.getGuild(), desc, bold));
+                    event.reply(Utils.createBotMessage(event.getGuild(), desc, false));
                 else
                     event.reply(Utils.createBotMessage(event.getGuild(), title, desc));
                 return;
