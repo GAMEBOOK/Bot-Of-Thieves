@@ -19,10 +19,12 @@ public class VoiceChatRoom
     private final String name;
     private final Set<User> users = new HashSet<>(4);
     private final Map<User, Set<User>> usersSeen = new HashMap<>();
-    private final short maxUsers;
-    private Long channelId;
+    private final byte maxUsers;
+    private final Long channelId;
+    private boolean favourites;
+    private RepFilter repFilter;
 
-    public VoiceChatRoom(Guild guild, Member initialMember, short maxUsers)
+    public VoiceChatRoom(Guild guild, Member initialMember, byte maxUsers)
     {
         VoiceChannel channel = VoiceChatHandler.createVoiceChannel(guild, initialMember);
         userId = initialMember.getUser().getIdLong();
@@ -53,21 +55,47 @@ public class VoiceChatRoom
         return channelId;
     }
 
-    public short getMaxUsers()
+    public boolean isFavourites()
+    {
+        return favourites;
+    }
+
+    public void setFavourites(boolean favourites)
+    {
+        this.favourites = favourites;
+    }
+
+    public void setRepFilter(RepFilter repFilter)
+    {
+        this.repFilter = repFilter;
+    }
+
+    public String getRepFilterText()
+    {
+        return repFilter.toString();
+    }
+
+    public byte getMaxUsers()
     {
         return maxUsers;
     }
 
-    public boolean addUser(User user)
+    public AddUserResponse addUser(User user)
     {
-        addUserToSeen(user);
-        users.add(user);
-        return users.size() <= maxUsers;
+        boolean hasSpace = users.size() < maxUsers;
+        boolean isRepAcceptable = repFilter.filter(user);
+        if(hasSpace && isRepAcceptable)
+        {
+            addUserToSeen(user);
+            users.add(user);
+        }
+        return !hasSpace ? AddUserResponse.ROOM_FULL : !isRepAcceptable ? AddUserResponse.REPUTATION : AddUserResponse.SUCCESS;
     }
 
     public void removeUser(User user)
     {
         users.remove(user);
+        usersSeen.remove(user);
     }
 
     private void addUserToSeen(User user)
@@ -99,6 +127,10 @@ public class VoiceChatRoom
                         });
             });
         });
-        usersSeen.remove(user);
+    }
+
+    public void sendUserLeaveMessages()
+    {
+        users.forEach(this::sendUserLeaveMessage);
     }
 }

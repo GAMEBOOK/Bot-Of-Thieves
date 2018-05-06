@@ -2,17 +2,20 @@ package brightspark.botofthieves.data.voicechat;
 
 public class VoiceChatRequest
 {
-    private final long messageId, userId, channelId, guildId, startTime;
+    private final long messageId, userId, channelId, guildId;
+    private long startTime;
     private final boolean favouritesOnly;
+    private final String description;
 
-    public VoiceChatRequest(long messageId, long userId, long channelId, long guildId, boolean favouritesOnly)
+    public VoiceChatRequest(long messageId, long userId, long channelId, long guildId, boolean favouritesOnly, String description)
     {
         this.messageId = messageId;
         this.userId = userId;
         this.channelId = channelId;
         this.guildId = guildId;
-        startTime = System.currentTimeMillis();
+        setStartTime();
         this.favouritesOnly = favouritesOnly;
+        this.description = description;
     }
 
     public long getMessageId()
@@ -40,8 +43,18 @@ public class VoiceChatRequest
         return startTime;
     }
 
+    public void setStartTime()
+    {
+        startTime = System.currentTimeMillis();
+    }
+
     public boolean isFavouritesOnly()
     {
         return favouritesOnly;
+    }
+
+    public String getDescription()
+    {
+        return description;
     }
 }

@@ -52,34 +52,43 @@ public class VoiceChatListener extends ListenerAdapter
         }
 
         //Try add user to the crew
-        if(room.addUser(user))
+        switch(room.addUser(user))
         {
-            VoiceChannel vc = guild.getVoiceChannelById(room.getChannelId());
-            if(vc == null)
-            {
-                channel.sendMessage(Utils.createBotMessage(guild, user.getAsMention() + " the crew voice chat does not exist! The request has been cancelled.", false)).queue();
-                VoiceChatHandler.removeRequest(messageId);
-                return;
-            }
+            case SUCCESS:
+                VoiceChannel vc = guild.getVoiceChannelById(room.getChannelId());
+                if(vc == null)
+                {
+                    channel.sendMessage(Utils.createBotMessage(guild, user.getAsMention() + " the crew voice chat does not exist! The request has been cancelled.", false)).queue();
+                    VoiceChatHandler.removeRequest(messageId);
+                    return;
+                }
 
-            Member member = guild.getMember(user);
-            VoiceChatHandler.grantVoiceChannelMemberPerms(vc, member);
-            if(member.getVoiceState().inVoiceChannel())
-                //Move the member to the voice channel
-                guild.getController().moveVoiceMember(member, vc).queue();
-            else
-                channel.sendMessage(Utils.createBotMessage(guild, user.getAsMention() + " you are not already in a voice channel. Please manually join the crew " + room.getName(), false)).queue();
-        }
-        else
-        {
-            channel.sendMessage(Utils.createBotMessage(guild, user.getAsMention() + " this crew is already full! The request has been cancelled.", false)).queue();
-            VoiceChatHandler.removeRequest(messageId);
+                Member member = guild.getMember(user);
+                VoiceChatHandler.grantVoiceChannelMemberPerms(vc, member);
+                if(member.getVoiceState().inVoiceChannel())
+                    //Move the member to the voice channel
+                    guild.getController().moveVoiceMember(member, vc).queue();
+                else
+                    channel.sendMessage(Utils.createBotMessage(guild, user.getAsMention() + " you are not already in a voice channel. Please manually join the crew " + room.getName(), false)).queue();
+                break;
+            case ROOM_FULL:
+                channel.sendMessage(Utils.createBotMessage(guild, user.getAsMention() + " this crew is already full! The request has been cancelled.", false)).queue();
+                VoiceChatHandler.removeRequest(messageId);
+                break;
+            case REPUTATION:
+                channel.sendMessage(Utils.createBotMessage(guild,
+                        String.format("%s you do not meet the reputation requirements of %s for this crew.", user.getAsMention(), room.getRepFilterText()),
+                        false)).queue();
+                VoiceChatHandler.removeRequest(messageId);
+                break;
+            default: //:shrug:
         }
     }
 
     @Override
     public void onGuildVoiceLeave(GuildVoiceLeaveEvent event)
     {
+        //Handle users leaving rooms
         VoiceChannel voiceChannel = event.getChannelLeft();
         VoiceChatRoom room = VoiceChatHandler.getRoomByChannel(voiceChannel.getIdLong());
         if(room == null) return;

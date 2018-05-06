@@ -8,15 +8,13 @@ import net.dv8tion.jda.core.entities.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class VoiceChatHandler
 {
     private static final Logger LOG = LoggerFactory.getLogger(VoiceChatHandler.class);
-
     private static final int REQUEST_TIMEOUT;
 
     //Long is the userId
@@ -44,6 +42,7 @@ public class VoiceChatHandler
             synchronized(REQUESTS)
             {
                 long curTime = System.currentTimeMillis();
+                Set<Long> userIds = new HashSet<>();
                 Iterator<Map.Entry<Long, VoiceChatRequest>> iter = REQUESTS.entrySet().iterator();
                 while(iter.hasNext())
                 {
@@ -53,7 +52,8 @@ public class VoiceChatHandler
                     {
                         Guild guild = BotOfThieves.JDA.getGuildById(request.getGuildId());
                         TextChannel channel = guild.getTextChannelById(request.getChannelId());
-                        if(channel != null)
+                        //We make sure to only send a message once per user
+                        if(channel != null && userIds.add(request.getUserId()))
                         {
                             User user = BotOfThieves.JDA.getUserById(request.getUserId());
                             LOG.info(String.format("Timed out crew request from user %s (%s)", user.getName(), user.getIdLong()));
@@ -85,7 +85,17 @@ public class VoiceChatHandler
 
     public static void removeRoom(long userId)
     {
-        ROOMS.remove(userId);
+        //Remove the channel
+        VoiceChatRoom room = ROOMS.get(userId);
+        if(room != null)
+        {
+            room.sendUserLeaveMessages();
+            VoiceChannel channel = BotOfThieves.JDA.getVoiceChannelById(room.getChannelId());
+            if(channel != null) channel.delete().queue();
+            ROOMS.remove(userId);
+        }
+        //Remove any requests
+        getRequestsByUser(userId).forEach(request -> removeRequest(request.getMessageId()));
     }
 
     public static void grantVoiceChannelMemberPerms(Channel channel, Member member)
@@ -97,7 +107,7 @@ public class VoiceChatHandler
         perms.getManager().grant(Permission.ALL_VOICE_PERMISSIONS).complete();
     }
 
-    public static VoiceChatRoom createRoom(Guild guild, Member member, short maxUsers)
+    public static VoiceChatRoom createRoom(Guild guild, Member member, byte maxUsers)
     {
         VoiceChatRoom room = getRoom(member.getUser().getIdLong());
         if(room != null)
@@ -138,9 +148,11 @@ public class VoiceChatHandler
      * Tries to add a new crew request.
      * Returns false if the user already has an active request.
      */
-    public static boolean addRequest(long messageId, long userId, long channelId, long guildId, boolean favouritesOnly)
+    public static boolean addRequest(long messageId, long userId, long channelId, long guildId, boolean favouritesOnly, String description)
     {
-        return REQUESTS.putIfAbsent(messageId, new VoiceChatRequest(messageId, userId, channelId, guildId, favouritesOnly)) == null;
+        //Update any existing requests' start time
+        REQUESTS.values().stream().filter(request -> request.getUserId() == userId).forEach(VoiceChatRequest::setStartTime);
+        return REQUESTS.putIfAbsent(messageId, new VoiceChatRequest(messageId, userId, channelId, guildId, favouritesOnly, description)) == null;
     }
 
     /**
@@ -155,6 +167,11 @@ public class VoiceChatHandler
     public static VoiceChatRequest getRequest(long messageId)
     {
         return REQUESTS.get(messageId);
+    }
+
+    public static Set<VoiceChatRequest> getRequestsByUser(long userId)
+    {
+        return REQUESTS.values().stream().filter(request -> request.getUserId() == userId).collect(Collectors.toSet());
     }
 
     public static boolean userHasRequest(long userId)
